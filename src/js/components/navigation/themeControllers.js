@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { Group, Cell, Switch, Spinner } from "@vkontakte/vkui";
+import { SimpleCell, Switch, Spinner } from "@vkontakte/vkui";
 import { Icon28MoonOutline } from "@vkontakte/icons";
 
 let isDarkScheme = false
@@ -17,13 +17,12 @@ function ThemeControllers() {
   function changeScheme() {
     let schemeAttribute = document.createAttribute('scheme');
     isDarkScheme = !isDarkScheme
-    schemeAttribute.value = isDarkScheme ? 'vkcom_dark' : 'vkcom_light'
+    schemeAttribute.value = isDarkScheme ? 'space_gray' : 'bright_light'
     document.body.attributes.setNamedItem(schemeAttribute)
   }
 
   return (
-    <Group>
-      <Cell
+      <SimpleCell
         before={<Icon28MoonOutline />}
         disabled
         after={
@@ -38,8 +37,7 @@ function ThemeControllers() {
         }
       >
         Тёмная тема
-      </Cell>
-    </Group>
+      </SimpleCell>
   );
 };
 

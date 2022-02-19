@@ -1,131 +1,84 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import {
-    Div,  
-    Alert, 
-    Group, 
-    Button, 
+    Div,
+    Group,
+    Button,
     PanelHeader,
     ScreenSpinner,
-    Snackbar,
-    Avatar
+    PanelHeaderButton,
+    Header,
+    Card,
+    FormItem, Checkbox, PullToRefresh,
 } from '@vkontakte/vkui'
-import { Icon16Done } from '@vkontakte/icons'
-import img from '../../../svg/chel.svg'
+import {
+    Icon28AddOutline,
+    Icon28SettingsOutline
+} from '@vkontakte/icons'
 
 function HomePanelBase({router}) {
-    const [showImg, setShowImg] = useState(false)
-    const [snackbar, setSnackbar] = useState(null)
 
-    function openAlert() {
-        router.toPopout(
-            <Alert
-                actions={[{
-                    title: 'Нет',
-                    autoclose: true,
-                    mode: 'cancel',
-                }, {
-                    title: 'Да',
-                    autoclose: true,
-                    mode: 'destructive',
-                    action: () => setShowImg(true)
-                }]}
-                onClose={() => router.toPopout()}
-                header='Вопрос значит'
-                text='Вас роняли в детстве?'
-            />
-        )
-    }
-
+    // eslint-disable-next-line
     async function openSpinner() {
         router.toPopout(<ScreenSpinner/>)
         await new Promise(resolve => setTimeout(resolve, 2000))
         router.toPopout()
     }
 
-    function openSnackbar() {
-        setSnackbar(
-            <Snackbar
-                layout='vertical'
-                onClose={() => setSnackbar(null)}
-                action='Например кнопка'
-                before={
-                    <Avatar size={24} style={{ background: 'var(--accent)' }}> 
-                        <Icon16Done fill='#fff'/> 
-                    </Avatar>
-                }
-            >
-                Какой-то текст
-            </Snackbar>
-        )
-    }
-
     return (
         <>
-            <PanelHeader separator={false}>Главная</PanelHeader>
-            <Group>
-                <Div>
-                    <Button 
-                        size="l" 
-                        stretched
-                        mode="secondary" 
+            <PullToRefresh onRefresh={openSpinner}>
+            <PanelHeader
+                left={
+                    <PanelHeaderButton
                         onClick={() => router.toPanel('placeholder')}
                     >
-                        Открыть Panel
-                    </Button>
-                </Div>
-
-                <Div>
-                    <Button 
-                        size="l" 
-                        stretched
-                        mode="secondary" 
-                        onClick={() => openAlert()}
-                    >
-                        Открыть Alert
-                    </Button>
-                </Div>
-
-                <Div>
-                    <Button 
-                        size="l" 
-                        stretched
-                        mode="secondary" 
-                        onClick={() => openSpinner()}
-                    >
-                        Открыть ScreenSpinner
-                    </Button>
-                </Div>
-
+                        <Icon28SettingsOutline/>
+                    </PanelHeaderButton>
+                }
+                separator={false}
+            >
+                Заметки
+            </PanelHeader>
+            <Group>
                 <Div>
                     <Button
-                        size="l" 
                         stretched
-                        mode="secondary" 
-                        onClick={() => openSnackbar()}
+                        size='l'
+                        before={<Icon28AddOutline/>}
                     >
-                        Открыть Snackbar
+                        Создать заметку
                     </Button>
                 </Div>
-
-                <Div>
-                    <Button 
-                        size="l" 
-                        stretched
-                        mode="secondary" 
-                        onClick={() => router.toModal('botsList')}
-                    >
-                        Открыть ModalPage
-                    </Button>
-                </Div>
-
-                {showImg && 
-                    <Div className='div-center'>
-                        <img src={img} alt="чел"/>
-                    </Div>
-                }
             </Group>
-            {snackbar}
+            <Group
+                header={<Header mode='secondary'>Мои заметки (2)</Header>}
+            >
+                <Div>
+                    <Card
+                        mode='outline'
+                    >
+                        <FormItem top='Тут было имя заметки' bottom='Создано: сегодня, 17:50'>
+                            1. Надо сделать то-то (кикнуть Матвея) <br/>
+                            2. Попить чай
+                            <Checkbox>Сделано</Checkbox>
+                        </FormItem>
+                    </Card>
+                </Div>
+                <Div>
+                    <Card
+                        mode='outline'
+                    >
+                        <FormItem top='Олег лох азаза' bottom='Создано: сегодня, 17:48'>
+                            1. Слить интерфейс модератора<br/>
+                            2. Исправить отчеты (отклонить)<br/>
+                            3. Попить чай
+                            <Checkbox>Сделано</Checkbox>
+                        </FormItem>
+                    </Card>
+                </Div>
+            </Group>
+            </PullToRefresh>
         </>
     );
 }

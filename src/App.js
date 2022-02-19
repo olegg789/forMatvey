@@ -17,9 +17,6 @@ import {
   withAdaptivity,
 } from "@vkontakte/vkui";
 
-import DesktopNavigation from './js/components/navigation/desktop';
-import MobailNavigation from './js/components/navigation/mobail';
-
 import HomeBotsListModal from './js/components/modals/HomeBotsListModal';
 import HomeBotInfoModal from './js/components/modals/HomeBotInfoModal';
 
@@ -28,6 +25,7 @@ const HomePanelPlaceholder = lazy(() => import('./js/panels/home/placeholder'));
 const ProfilePanelBase = lazy(() => import('./js/panels/profile/base'));
 
 const App = withAdaptivity(({ viewWidth, router }) => {
+  // eslint-disable-next-line
   const setActiveView = (e) => router.toView(e.currentTarget.dataset.id)
   
   const isDesktop = viewWidth >= 3
@@ -51,7 +49,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
   );
 
   return(
-    <ConfigProvider platform={platform} isWebView>
+    <ConfigProvider platform={platform} isWebView scheme={!isDesktop ? 'client_dark' : 'bright_light'}>
       <AppRoot>
         <SplitLayout
           header={hasHeader && <PanelHeader separator={false} />}
@@ -64,13 +62,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
             maxWidth={isDesktop ? '560px' : '100%'}
           >   
             <Epic 
-              activeStory={router.activeView} 
-              tabbar={!isDesktop && 
-                <MobailNavigation
-                  setActiveView={setActiveView}
-                  router={router}
-                />
-              }
+              activeStory={router.activeView}
             >
               <View 
                 id='home'
@@ -109,13 +101,6 @@ const App = withAdaptivity(({ viewWidth, router }) => {
             </Epic>
           </SplitCol>
 
-          {isDesktop && 
-            <DesktopNavigation
-              hasHeader={hasHeader}
-              setActiveView={setActiveView}
-              router={router}
-            />
-          }
             
         </SplitLayout>
       </AppRoot>
