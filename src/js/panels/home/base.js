@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
     Div,
@@ -9,7 +9,10 @@ import {
     PanelHeaderButton,
     Header,
     Card,
-    FormItem, Checkbox, PullToRefresh,
+    FormItem,
+    PullToRefresh,
+    Footer,
+    Placeholder
 } from '@vkontakte/vkui'
 import {
     Icon28AddOutline,
@@ -17,6 +20,7 @@ import {
 } from '@vkontakte/icons'
 
 function HomePanelBase({router}) {
+    const [notes, setNotes] = useState(null)
 
     // eslint-disable-next-line
     async function openSpinner() {
@@ -25,9 +29,40 @@ function HomePanelBase({router}) {
         router.toPopout()
     }
 
+    useEffect(
+        () => {getNotes()}, []
+    )
+
+    async function getNotes() {
+        await setNotes(
+            {
+                count: 3,
+                items:[
+                    {
+                        id:1,
+                        name: 'Моя первая заметка',
+                        value: 'Это крутая заметка',
+                        status: 'В работе'
+                    },
+                    {
+                        id:2,
+                        name: 'Вторя заметочка',
+                        value: 'Эта тоже крутая',
+                        status: 'Исправлен'
+                    },
+                    {
+                        id:3,
+                        name: 'Ну и третья',
+                        value: 'Всем привет',
+                        status: ''
+                    }]
+            }
+            )
+    }
+
     return (
         <>
-            <PullToRefresh onRefresh={openSpinner}>
+            <PullToRefresh onRefresh={() => {openSpinner(); getNotes()}}>
             <PanelHeader
                 left={
                     <PanelHeaderButton
@@ -52,31 +87,25 @@ function HomePanelBase({router}) {
                 </Div>
             </Group>
             <Group
-                header={<Header mode='secondary'>Мои заметки (2)</Header>}
+                header={<Header mode='secondary'>Мои заметки </Header>}
             >
-                <Div>
-                    <Card
-                        mode='outline'
-                    >
-                        <FormItem top='Тут было имя заметки' bottom='Создано: сегодня, 17:50'>
-                            1. Надо сделать то-то (кикнуть Матвея) <br/>
-                            2. Попить чай
-                            <Checkbox>Сделано</Checkbox>
-                        </FormItem>
-                    </Card>
-                </Div>
-                <Div>
-                    <Card
-                        mode='outline'
-                    >
-                        <FormItem top='Олег лох азаза' bottom='Создано: сегодня, 17:48'>
-                            1. Слить интерфейс модератора<br/>
-                            2. Исправить отчеты (отклонить)<br/>
-                            3. Попить чай
-                            <Checkbox>Сделано</Checkbox>
-                        </FormItem>
-                    </Card>
-                </Div>
+                {notes !== null ?
+                    <>
+                    {notes.items.map((el) => {
+                            return(
+                                <Div>
+                                    <Card mode='outline'>
+                                        <FormItem top={el.name} bottom={el.status}>
+                                            {el.value}
+                                        </FormItem>
+                                    </Card>
+                                </Div>
+                            )
+                    })}
+                        <Footer>{`Всего заметок: ${notes.count}`}</Footer>
+                    </>
+                    : <Placeholder>У вас еще нет заметок</Placeholder>
+                }
             </Group>
             </PullToRefresh>
         </>
