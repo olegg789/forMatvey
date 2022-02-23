@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, {lazy, Suspense, useState} from 'react';
 import { withRouter } from 'react-router-vkminiapps';
 
 import {
@@ -15,10 +15,12 @@ import {
   usePlatform,
   VKCOM,
   withAdaptivity,
+    Snackbar,
 } from "@vkontakte/vkui";
 
 import HomeBotsListModal from './js/components/modals/HomeBotsListModal';
 import HomeBotInfoModal from './js/components/modals/HomeBotInfoModal';
+import {Icon24CheckCircleOutline} from "@vkontakte/icons";
 
 const HomePanelBase = lazy(() => import('./js/panels/home/base'));
 const HomePanelPlaceholder = lazy(() => import('./js/panels/home/placeholder'));
@@ -27,16 +29,32 @@ const ProfilePanelBase = lazy(() => import('./js/panels/profile/base'));
 const App = withAdaptivity(({ viewWidth, router }) => {
   // eslint-disable-next-line
   const setActiveView = (e) => router.toView(e.currentTarget.dataset.id)
-  
+
+  const [snackbar, setSnackbar] = useState(null)
+
   const isDesktop = viewWidth >= 3
   const platform = isDesktop ? VKCOM : usePlatform()
   const hasHeader = isDesktop !== true
 
+  async function openSnackbar() {
+    setSnackbar(
+        <Snackbar
+            layout='vertical'
+            onClose={() => setSnackbar(null)}
+            before={<Icon24CheckCircleOutline/>}
+        >
+          Заметка создана! Обнови страницу!
+        </Snackbar>
+    )
+  }
+
   const modals = (
-    <ModalRoot>
+    <ModalRoot activeModal={router.modal}>
       <HomeBotsListModal
-        id="botsList"
+        id="addNote"
+        openSnackbar = {() => openSnackbar()}
         platform={platform}
+        onClose={() => router.toBack()}
         router={router}
       />
 
@@ -74,11 +92,12 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                   <Suspense fallback={<ScreenSpinner/>}>
                     <HomePanelBase router={router}/>
                   </Suspense>
+                  {snackbar}
                 </Panel>
 
                 <Panel id='placeholder'>
                   <Suspense fallback={<ScreenSpinner/>}>
-                    <HomePanelPlaceholder router={router}/>
+                    <HomePanelPlaceholder router={router} platform={platform}/>
                   </Suspense>
                 </Panel>
               </View>

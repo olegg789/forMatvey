@@ -13,16 +13,19 @@ import {
     PullToRefresh,
     Footer,
     Placeholder,
-    FormLayout,
+    FormLayout, Snackbar,
+    Alert,
+
 } from '@vkontakte/vkui'
 import {
+    Icon24CheckCircleOutline,
     Icon28AddOutline, Icon28DeleteOutline, Icon28EditOutline,
     Icon28SettingsOutline
 } from '@vkontakte/icons'
 
 function HomePanelBase({router}) {
     const [notes, setNotes] = useState(null)
-
+    const [snackbarDel, setSnackbarDel] = useState(null)
     // eslint-disable-next-line
     async function openSpinner() {
         router.toPopout(<ScreenSpinner/>)
@@ -33,6 +36,7 @@ function HomePanelBase({router}) {
     useEffect(
         () => {getNotes()}, []
     )
+
     /*статусы
     0 - открыт
     1 - в работе
@@ -46,11 +50,66 @@ function HomePanelBase({router}) {
         'На рассмотрении',
     ]
 
+    const priorites = [
+        'Низкий',
+        "Средний",
+        "Высокий",
+        "Критический"
+    ]
+
+    async function addNote() {
+        router.toModal('addNote');
+    }
+
+    function openSnackbar() {
+        setSnackbarDel(
+            <Snackbar
+                layout='vertical'
+                onClose={() => setSnackbarDel(null)}
+                before={<Icon28DeleteOutline/>}
+            >
+                Заметка удалена! Обнови страницу!
+            </Snackbar>
+        )
+    }
+
+    function openAlert(id) {
+        router.toPopout(
+            <Alert
+                actions={[{
+                    title: 'Нет',
+                    autoclose: true,
+                    mode: 'cancel',
+                }, {
+                    title: 'Да',
+                    autoclose: true,
+                    mode: 'destructive',
+                    action: () => {deleteNote(id); openSnackbar()}
+                }]}
+                onClose={() => router.toPopout()}
+                header='Подтверждение'
+                text='Вы точно хотите удалить эту заметку?'
+            />
+        )
+    }
+
+    async function deleteNote(id) {
+        try {
+            let token = window.location.search.slice(1).replace(/&/gi, '/');
+            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
+            let responseJSON = await response.json()
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
+
     async function getNotes() {
         try {
             let token = window.location.search.slice(1).replace(/&/gi, '/');
             let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.getMyNotes&access_token=${token}`)
             let responseJSON = await response.json()
+            responseJSON.items.reverse()
             setNotes(responseJSON)
         }
         catch (err) {
@@ -79,29 +138,54 @@ function HomePanelBase({router}) {
                         stretched
                         size='l'
                         before={<Icon28AddOutline/>}
+                        onClick={() => addNote()}
                     >
                         Создать заметку
                     </Button>
                 </Div>
             </Group>
             <Group
-                header={<Header mode='secondary'>Мои заметки </Header>}
+                header={
+                    <Header
+                        mode='secondary'
+                    >
+                        Мои заметки
+                    </Header>
+                }
             >
                 {notes !== null ?
                     <>
-                    {notes.items.map((el) => {
+                    {
+                        notes.items.map((el) => {
                             return(
                                 <Div>
                                     <Card mode='outline'>
                                         <FormLayout>
-                                            <FormItem top={el.name} bottom={statuses[el.status]}>
+                                            <FormItem
+                                                top={
+                                                    el.name
+                                                }
+                                                bottom={
+                                                    `Статус: ${statuses[el.status]}, приоритет: ${priorites[el.priority]}`
+                                                }
+                                            >
                                                 {el.value}
                                             </FormItem>
                                             <FormItem>
-                                                <Button className='btnNote'>
+                                                <Button
+                                                    className='btnNote'
+                                                    mode='outline'
+                                                    sizeY='regular'
+                                                >
                                                     <Icon28EditOutline/>
                                                 </Button>
-                                                <Button className='btnNote'>
+                                                <Button
+                                                    className='btnNote'
+                                                    mode='outline'
+                                                    appearance='negative'
+                                                    sizeY='regular'
+                                                    onClick={() => openAlert(el.noteId)}
+                                                >
                                                     <Icon28DeleteOutline/>
                                                 </Button>
                                             </FormItem>
@@ -116,6 +200,7 @@ function HomePanelBase({router}) {
                 }
             </Group>
             </PullToRefresh>
+            {snackbarDel}
         </>
     );
 }

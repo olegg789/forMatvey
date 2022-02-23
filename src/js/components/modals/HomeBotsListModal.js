@@ -1,42 +1,163 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import {
-    List,
-    ModalPage, 
-    ModalPageHeader, 
-    PanelHeaderButton, 
-    withPlatform, 
-    IOS
+    ModalPage,
+    ModalPageHeader,
+    PanelHeaderButton,
+    withPlatform,
+    IOS,
+    FormLayout,
+    FormItem,
+    Textarea,
+    Input,
+    Div,
+    Button,
 } from "@vkontakte/vkui";
-import { Icon24Dismiss, Icon24Cancel,} from '@vkontakte/icons'
+import {
+    Icon24Dismiss,
+    Icon24Cancel,
+} from '@vkontakte/icons'
 
-function BotsListModal({id, platform, router}) {
+function BotsListModal({id, platform, router, openSnackbar}) {
+    const [note, setNote] = useState('')
+    const [value, setValue] = useState('')
+    const [status, setStatus] = useState('')
+    const [priority, setPriority] = useState('')
+
+    async function oncChange(e) {
+
+        const {name, value} = e.currentTarget;
+
+        if (name === 'name') {
+            setNote(value)
+        }
+
+        else if (name === 'value') {
+            setValue(value)
+        }
+
+        else if (name === 'status') {
+            setStatus(value)
+        }
+
+        else if (name === 'priority') {
+            setPriority(value)
+        }
+    }
+
+    async function addNote() {
+        try {
+            let token = window.location.search.slice(1).replace(/&/gi, '/');
+            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.createNote&access_token=${token}&name=${note}&value=${value}&status=${status}&priority=${priority}`)
+            let responseJSON = response.json()
+            console.log(responseJSON)
+            router.toBack()
+            openSnackbar()
+
+        }
+        catch(err) {
+            console.log(err)
+        }
+    }
+
     return (
         <ModalPage
             id={id}
             header={
                 <ModalPageHeader
                     left={platform !== IOS && 
-                        <PanelHeaderButton onClick={() => router.toBack()}>
+                        <PanelHeaderButton
+                            onClick={
+                                () => router.toBack()
+                            }
+                        >
                             <Icon24Cancel/>
                         </PanelHeaderButton>
                     }
 
                     right={platform === IOS && 
-                        <PanelHeaderButton onClick={() => router.toBack()}>
+                        <PanelHeaderButton
+                            onClick={
+                                () => router.toBack()
+                            }
+                        >
                             <Icon24Dismiss/>
                         </PanelHeaderButton>
                     }
                 >
-                    Сообщества
+                    Создать заметку
                 </ModalPageHeader>
             }
             onClose={() => router.toBack()}
             settlingHeight={100}
         >
-            <List>
-                jopa
-            </List>
+            <FormLayout>
+                <FormItem
+                    top='Введите имя заметки'
+                    bottom='string'
+                >
+                    <Textarea
+                        name='name'
+                        placeholder='Введите значение...'
+                        maxLength={100}
+                        value={note}
+                        onChange={(e) => oncChange(e)}
+                    />
+                </FormItem>
+                <FormItem
+                    top='Введите текст заметки'
+                    bottom='string'
+                >
+                    <Textarea
+                        value={value}
+                        name='value'
+                        placeholder='Введите значение...'
+                        maxLength={100}
+                        onChange={(e) => oncChange(e)}
+                    />
+                </FormItem>
+                <FormItem
+                    top='Введите статус заметки'
+                    bottom={`Возможные значения:
+                    0 - открыт,
+                    1 - в работе,
+                    2 - завершен,
+                    3 - на рассмотрении`}
+                >
+                    <Input
+                        value={status}
+                        name='status'
+                        placeholder='Введите значение...'
+                        type='number'
+                        onChange={(e) => oncChange(e)}
+                    />
+                </FormItem>
+                <FormItem
+                    top='Введите приоритет заметки'
+                    bottom='Возможные значения:
+                    0 - низкий,
+                    1 - средний,
+                    2 - высокий,
+                    3 - критический
+                '>
+                    <Input
+                        value={priority}
+                        name='priority'
+                        placeholder='Введите значение...'
+                        type='number'
+                        onChange={(e) => oncChange(e)}
+                    />
+                </FormItem>
+                <Div>
+                    <Button
+                        size='l'
+                        stretched
+                        onClick={() => addNote()}
+                   >
+                        Создать
+                    </Button>
+                </Div>
+            </FormLayout>
         </ModalPage>
     );
 }

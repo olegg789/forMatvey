@@ -15,7 +15,6 @@ import {
     VKCOM,
     usePlatform,
 } from "@vkontakte/vkui";
-import ThemeControllers from "../../components/navigation/themeControllers";
 import {
     Icon28SmartphoneOutline,
     Icon28MessagesOutline,
@@ -80,14 +79,11 @@ function HomePanelPlaceholder({isDesktop, router}) {
                     </Title>
 
                     <Text className='SubheaderUser'>
-                        {frazes[Math.random()]}
+                        {frazes[Math.floor((Math.random() * 5))]}
                     </Text>
                 </Gradient>
             </Group>
                 <Group header={<Header mode="secondary">Прочее</Header>}>
-                    {isDesktop &&
-                        <ThemeControllers/>
-                    }
                     <SimpleCell
                         className='btn_settings'
                         before={
