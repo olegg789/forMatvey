@@ -59,6 +59,32 @@ class notes(Resource):
                     if request.args.to_dict().get('method') == 'notes.getMyNotes':
                         resultData = actionDB.getData(query_params['vk_user_id'])
                         return {"count": resultData[0], "items": resultData[1]}, 200
+
+                    if request.args.to_dict().get('method') == 'notes.createNote':
+                        print(request.args.to_dict())
+                        for param in ['name','value','priority','status']:
+                                if request.args.to_dict().get(param) == None or request.args.to_dict().get(param) == '':
+                                        return {"error": True, "messsage": 'One of the parameters is invalid'}, 400
+                        priority = re.match('^[0-9]+$', request.args.to_dict().get('priority')); status = re.match('^[0-9]+$', request.args.to_dict().get('status'))
+                        if priority == None or status == None:
+                                return {"error": True, "messsage": 'One of the parameters is invalid'}, 400
+                        for param in ['status', 'priority']:
+                                print(param); print(type(param))
+                                if int(request.args.to_dict().get(param)) < 0 or int(request.args.to_dict().get(param)) > 3:
+                                        return {"error": True, "messsage": 'One of the parameters is invalid'}, 400
+
+                        resultData = actionDB.createNote(query_params['vk_user_id'], request.args.to_dict().get('name'), request.args.to_dict().get('value'), request.args.to_dict().get('priority'), request.args.to_dict().get('status'))
+                        return {"message": resultData}, 200
+
+                    if request.args.to_dict().get('method') == 'notes.deleteNote':
+                        if request.args.to_dict().get('noteId') == None or request.args.to_dict().get('noteId') == '':
+                                return {"error": True, "messsage": 'Invalid passed noteId'}, 400
+                        noteId = re.match('^[0-9]+$', request.args.to_dict().get('noteId'))
+                        if noteId == None:
+                                return {"error": True, "messsage": 'Invalid passed noteId'}, 400
+                        else:
+                                resultData = actionDB.deleteNote(int(query_params['vk_user_id']), int(request.args.to_dict().get('noteId')))
+                                return resultData
                     else:
                         return {"error": True, "message": 'Invalid passed method'}, 400
                 else:
