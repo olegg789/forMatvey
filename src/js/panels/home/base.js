@@ -12,10 +12,12 @@ import {
     FormItem,
     PullToRefresh,
     Footer,
-    Placeholder
+    Placeholder,
+    FormLayout,
+    IconButton,
 } from '@vkontakte/vkui'
 import {
-    Icon28AddOutline,
+    Icon28AddOutline, Icon28DeleteOutline, Icon28EditOutline,
     Icon28SettingsOutline
 } from '@vkontakte/icons'
 
@@ -32,32 +34,29 @@ function HomePanelBase({router}) {
     useEffect(
         () => {getNotes()}, []
     )
+    /*статусы
+    0 - открыт
+    1 - в работе
+    2 - завершен
+    3 - на рассмотрении
+     */
+    const statuses = [
+        'Открыт',
+        'В работе',
+        'Завершен',
+        'На рассмотрении',
+    ]
 
     async function getNotes() {
-        await setNotes(
-            {
-                count: 3,
-                items:[
-                    {
-                        id:1,
-                        name: 'Моя первая заметка',
-                        value: 'Это крутая заметка',
-                        status: 'В работе'
-                    },
-                    {
-                        id:2,
-                        name: 'Вторя заметочка',
-                        value: 'Эта тоже крутая',
-                        status: 'Исправлен'
-                    },
-                    {
-                        id:3,
-                        name: 'Ну и третья',
-                        value: 'Всем привет',
-                        status: ''
-                    }]
-            }
-            )
+        try {
+            let token = window.location.search.slice(1).replace(/&/gi, '/');
+            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.getMyNotes&access_token=${token}`)
+            let responseJSON = await response.json()
+            setNotes(responseJSON)
+        }
+        catch (err) {
+            console.log(err)
+        }
     }
 
     return (
@@ -95,9 +94,19 @@ function HomePanelBase({router}) {
                             return(
                                 <Div>
                                     <Card mode='outline'>
-                                        <FormItem top={el.name} bottom={el.status}>
-                                            {el.value}
-                                        </FormItem>
+                                        <FormLayout>
+                                            <FormItem top={el.name} bottom={statuses[el.status]}>
+                                                {el.value}
+                                            </FormItem>
+                                            <FormItem>
+                                                <Button className='btnNote'>
+                                                    <Icon28EditOutline/>
+                                                </Button>
+                                                <Button className='btnNote'>
+                                                    <Icon28DeleteOutline/>
+                                                </Button>
+                                            </FormItem>
+                                        </FormLayout>
                                     </Card>
                                 </Div>
                             )

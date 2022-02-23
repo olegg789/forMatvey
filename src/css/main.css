@@ -36,3 +36,8 @@
     margin-bottom: 24px;
     color: var(--text_secondary)
 }
+
+.btnNote {
+    margin-left: 10px;
+    margin-right: 10px;
+}
