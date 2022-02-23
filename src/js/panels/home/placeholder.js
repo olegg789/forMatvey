@@ -4,24 +4,39 @@ import {
     PanelHeader,
     PanelHeaderBack,
     Group,
-    FormLayout,
-    FormItem,
     SimpleCell,
     Avatar,
     ScreenSpinner,
     Title,
     Gradient,
     Text,
+    Header,
+    ANDROID,
+    VKCOM,
+    usePlatform,
 } from "@vkontakte/vkui";
 import ThemeControllers from "../../components/navigation/themeControllers";
-import {Icon28Users3Outline} from "@vkontakte/icons";
+import {
+    Icon28SmartphoneOutline,
+    Icon28MessagesOutline,
+    Icon28ShareOutline,
+    Icon28FavoriteOutline,
+} from "@vkontakte/icons";
 import bridge from "@vkontakte/vk-bridge";
 
 let isInfoUser = false
 let infoUser = ['Загрузка...']
 
-function HomePanelPlaceholder({router, isDesktop}) {
+function HomePanelPlaceholder({isDesktop, router}) {
     const [infoUsers, setInfoUser] = useState(infoUser)
+    const platform = isDesktop ? VKCOM : usePlatform()
+    const frazes = [
+        'Приветик',
+        'Зачем ты сюда зашел',
+        'Привет от Олега',
+        'Привет от Матвея',
+        'Как дела?)'
+    ]
 
     useEffect(() => {
         if (!isInfoUser) {
@@ -65,25 +80,75 @@ function HomePanelPlaceholder({router, isDesktop}) {
                     </Title>
 
                     <Text className='SubheaderUser'>
-                        Олег Чикелев лучший разработчик
+                        {frazes[Math.random()]}
                     </Text>
                 </Gradient>
-                <FormLayout>
+            </Group>
+                <Group header={<Header mode="secondary">Прочее</Header>}>
                     {isDesktop &&
-                    <FormItem>
                         <ThemeControllers/>
-                    </FormItem>
                     }
-                    <FormItem>
+                    <SimpleCell
+                        className='btn_settings'
+                        before={
+                            <Avatar
+                                shadow={false}
+                                size={43}
+                            >
+                                <Icon28FavoriteOutline/>
+                            </Avatar>
+                        }
+                        onClick={() => bridge.send("VKWebAppAddToFavorites")}
+                    >
+                        Добавить в избранное
+                    </SimpleCell>
+
+                    {platform === ANDROID &&
                         <SimpleCell
-                            before={<Icon28Users3Outline/>}
-                            href='https://vk.com/sab_t'
-                            target='_blank'
+                            className='btn_settings'
+                            before={
+                                <Avatar
+                                    shadow={false}
+                                    size={43}
+                                >
+                                    <Icon28SmartphoneOutline/>
+                                </Avatar>
+                            }
+                            onClick={() => bridge.send("VKWebAppAddToHomeScreen")}
                         >
-                            Группа разработчика
+                            Добавить на главный экран
                         </SimpleCell>
-                    </FormItem>
-                </FormLayout>
+                    }
+
+                    <SimpleCell
+                        className='btn_settings'
+                        before={
+                            <Avatar
+                                shadow={false}
+                                size={43}
+                            >
+                                <Icon28MessagesOutline/>
+                            </Avatar>
+                        }
+                        href="https://vk.me/sab_t"
+                        target='_blank'
+                    >
+                        Поддержка
+                    </SimpleCell>
+
+                    <SimpleCell
+                        before={
+                            <Avatar
+                                shadow={false}
+                                size={43}
+                            >
+                                <Icon28ShareOutline/>
+                            </Avatar>
+                        }
+                        onClick={() => bridge.send("VKWebAppShare", {link: "https://vk.com/app8084045"})}
+                    >
+                        Поделиться приложением
+                    </SimpleCell>
             </Group>
         </>
     )

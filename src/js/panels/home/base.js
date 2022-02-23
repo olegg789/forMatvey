@@ -14,7 +14,6 @@ import {
     Footer,
     Placeholder,
     FormLayout,
-    IconButton,
 } from '@vkontakte/vkui'
 import {
     Icon28AddOutline, Icon28DeleteOutline, Icon28EditOutline,
