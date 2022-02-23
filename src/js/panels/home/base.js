@@ -153,7 +153,7 @@ function HomePanelBase({router}) {
                     </Header>
                 }
             >
-                {notes !== null ?
+                {notes.items.length !== 0 ?
                     <>
                     {
                         notes.items.map((el) => {
