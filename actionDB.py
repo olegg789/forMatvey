@@ -8,11 +8,9 @@ def createNote(user_id, name, value, priority, status):
     cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` STRING, `value` STRING, `priority` INT, `status` INT)")
     cur.execute('SELECT noteId FROM `allUsers`')
     result = cur.fetchall()
-    print(result)
     if len(result) == 0:
                 result = 1
     else:
-                print(result[-1][-1])
                 result = int(result[-1][-1]) + 1
     cur.execute('''insert into allUsers (id,noteId,name,value,priority,status)values
                 (:id,:noteId,:name,:value,:priority,:status)''',{'id':user_id,'noteId':result,'name':name,'value':value,'priority':priority,'status':status})
@@ -56,3 +54,18 @@ def deleteNote(user_id, noteId):
                 return {"message": 'ok'}, 200
     else:
                 return {"error": True, "message": 'One of the parameters is invalid'}, 400
+
+def editNote(user_id, noteId, name, value, priority, status):
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` STRING, `value` STRING, `priority` INT, `status` INT)")
+    cur.execute('SELECT id FROM `allUsers` WHERE noteId = ?', (noteId,))
+    result = cur.fetchall()
+    if len(result) == 0:
+        return {"error": True, "message": 'Incorrectly passed noteId'}, 400
+    if result[-1][-1] == user_id:
+        cur.execute(
+                    'UPDATE allUsers SET name = ?, value = ?, priority = ?, status = ? WHERE noteId = ?', (name, value, priority, status, noteId))
+        con.commit(); cur.close()
+        return {"message": 'ok'}, 200
+    else:
+        return {"error": True, "message": 'One of the parameters is invalid'}, 400
