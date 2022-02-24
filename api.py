@@ -45,9 +45,9 @@ class notes(Resource):
 
         def get(self):
                 if len(request.args.to_dict()) == 0:
-                        return {"error": True, "messsage": 'Incorrectly passed parameters'}, 400
+                        return {"error": True, "code": 5, "messsage": 'Incorrectly passed parameters'}, 400
                 if request.args.to_dict().get('method') == None or request.args.to_dict().get('access_token') == None:
-                    return {"error": True, "messsage": 'Incorrectly passed parameters'}, 400
+                    return {"error": True, "code": 5, "messsage": 'Incorrectly passed parameters'}, 400
                 query_params = dict(
                     parse_qsl(
                         urlparse(f"https://example.com/?{request.args.to_dict().get('access_token').replace('/', '&')}").query,
@@ -60,21 +60,29 @@ class notes(Resource):
                         resultData = actionDB.getData(query_params['vk_user_id'])
                         return {"count": resultData[0], "items": resultData[1]}, 200
 
-                    if request.args.to_dict().get('method') == 'notes.createNote':
-                        print(request.args.to_dict())
-                        for param in ['name','value','priority','status']:
-                                if request.args.to_dict().get(param) == None or request.args.to_dict().get(param) == '':
-                                        return {"error": True, "messsage": 'One of the parameters is invalid'}, 400
-                        priority = re.match('^[0-9]+$', request.args.to_dict().get('priority')); status = re.match('^[0-9]+$', request.args.to_dict().get('status'))
-                        if priority == None or status == None:
-                                return {"error": True, "messsage": 'One of the parameters is invalid'}, 400
-                        for param in ['status', 'priority']:
-                                print(param); print(type(param))
-                                if int(request.args.to_dict().get(param)) < 0 or int(request.args.to_dict().get(param)) > 3:
-                                        return {"error": True, "messsage": 'One of the parameters is invalid'}, 400
+                    if request.args.to_dict().get('method') == 'notes.createNote' or request.args.to_dict().get('method') == 'notes.editNote':
+                        params = ['status', 'priority', 'name','value']
+                        for param in range(4):
+                                if request.args.to_dict().get(params[param]) == None or request.args.to_dict().get(params[param]) == '':
+                                        return {"error": True, "code": f'1{param}', "messsage": 'One of the parameters is invalid'}, 400
+                        for param in range(2):
+                                result = re.match('^[0-9]+$', request.args.to_dict().get(params[param]))
+                                if result == None:
+                                        return {"error": True, "code": f'1{param}', "messsage": 'One of the parameters is invalid'}, 400
+                                if int(request.args.to_dict().get(params[param])) < 0 or int(request.args.to_dict().get(params[param])) > 3:
+                                        return {"error": True, "code": f'1{param}', "messsage": 'One of the parameters is invalid'}, 400
+                        if request.args.to_dict().get('method') == 'notes.createNote':
+                                resultData = actionDB.createNote(query_params['vk_user_id'], request.args.to_dict().get('name').replace('¦', '&'), request.args.to_dict().get('value').replace('¦', '&'), request.args.to_dict().get('priority'), request.args.to_dict().get('status'))
+                                return {"message": resultData}, 200
 
-                        resultData = actionDB.createNote(query_params['vk_user_id'], request.args.to_dict().get('name'), request.args.to_dict().get('value'), request.args.to_dict().get('priority'), request.args.to_dict().get('status'))
-                        return {"message": resultData}, 200
+                        if request.args.to_dict().get('noteId') == None or request.args.to_dict().get('noteId') == '':
+                                        return {"error": True, "code": 14, "messsage": 'One of the parameters is invalid'}, 400
+                        result = re.match('^[0-9]+$', request.args.to_dict().get('noteId'))
+                        if result == None:
+                                        return {"error": True, "code": 14, "messsage": 'One of the parameters is invalid'}, 400
+                        if request.args.to_dict().get('method') == 'notes.editNote':
+                                resultData =  actionDB.editNote(int(query_params['vk_user_id']), request.args.to_dict().get('noteId'), request.args.to_dict().get('name').replace('¦', '&'), request.args.to_dict().get('value').replace('¦', '&'), request.args.to_dict().get('priority'), request.args.to_dict().get('status'))
+                                return resultData
 
                     if request.args.to_dict().get('method') == 'notes.deleteNote':
                         if request.args.to_dict().get('noteId') == None or request.args.to_dict().get('noteId') == '':
@@ -88,7 +96,7 @@ class notes(Resource):
                     else:
                         return {"error": True, "message": 'Invalid passed method'}, 400
                 else:
-                    return {"error": True, "messsage": 'One of the parameters is invalid'}, 400
+                    return {"error": True, "code": 5, "messsage": 'Incorrectly passed parameters'}, 400
 
 api.add_resource(notes, "/notes", "/notes/")
 if __name__ == '__main__':
