@@ -16,9 +16,11 @@ import {
 import {
     Icon24Dismiss,
     Icon24Cancel,
+    Icon28CheckCircleOutline,
+    Icon28CancelCircleOutline,
 } from '@vkontakte/icons'
 
-function BotsListModal({id, platform, router, openSnackbar}) {
+function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
     const [note, setNote] = useState('')
     const [value, setValue] = useState('')
     const [status, setStatus] = useState('')
@@ -48,11 +50,38 @@ function BotsListModal({id, platform, router, openSnackbar}) {
     async function addNote() {
         try {
             let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.createNote&access_token=${token}&name=${note}&value=${value}&status=${status}&priority=${priority}`)
-            let responseJSON = response.json()
+            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.createNote&access_token=${token}&name=${note.replace(/&/gi, '¦')}&value=${value.replace(/&/gi, '¦')}&status=${status}&priority=${priority}`)
+            //console.log(response)
+            // eslint-disable-next-line
+            let responseJSON = await response.json()
             console.log(responseJSON)
-            router.toBack()
-            openSnackbar()
+            if (response.ok) {
+                router.toBack()
+                getNotes()
+                openSnackbar('Заметка создана!', <Icon28CheckCircleOutline/>)
+            }
+            else if (responseJSON.error) {
+                if (responseJSON.code === '12') {
+                    router.toBack()
+                    openSnackbar('Произошла ошибка, вы ввели некорректное имя. Попробуйте снова!', <Icon28CancelCircleOutline/>)
+                }
+                else if (responseJSON.code === '10') {
+                    router.toBack()
+                    openSnackbar('Произошла ошибка, вы ввели некорректный статус. Попробуйте снова!', <Icon28CancelCircleOutline/>)
+                }
+                else if (responseJSON.code === '11') {
+                    router.toBack()
+                    openSnackbar('Произошла ошибка, вы ввели некорректный приоритет. Попробуйте снова!', <Icon28CancelCircleOutline/>)
+                }
+                else if (responseJSON.code === '13') {
+                    router.toBack()
+                    openSnackbar('Произошла ошибка, вы ввели некорректное значение заметки. Попробуйте снова!', <Icon28CancelCircleOutline/>)
+                }
+                else if (responseJSON.code === '14') {
+                    router.toBack()
+                    openSnackbar('Произошла ошибка, некорректный айди заметки. Попробуйте снова!', <Icon28CancelCircleOutline/>)
+                }
+            }
 
         }
         catch(err) {

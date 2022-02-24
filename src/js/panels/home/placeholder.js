@@ -9,7 +9,6 @@ import {
     ScreenSpinner,
     Title,
     Gradient,
-    Text,
     Header,
     ANDROID,
     VKCOM,
@@ -29,13 +28,6 @@ let infoUser = ['Загрузка...']
 function HomePanelPlaceholder({isDesktop, router}) {
     const [infoUsers, setInfoUser] = useState(infoUser)
     const platform = isDesktop ? VKCOM : usePlatform()
-    const frazes = [
-        'Приветик',
-        'Зачем ты сюда зашел',
-        'Привет от Олега',
-        'Привет от Матвея',
-        'Как дела?)'
-    ]
 
     useEffect(() => {
         if (!isInfoUser) {
@@ -78,9 +70,6 @@ function HomePanelPlaceholder({isDesktop, router}) {
                         {infoUsers[0]}
                     </Title>
 
-                    <Text className='SubheaderUser'>
-                        {frazes[Math.floor((Math.random() * 5))]}
-                    </Text>
                 </Gradient>
             </Group>
                 <Group header={<Header mode="secondary">Прочее</Header>}>

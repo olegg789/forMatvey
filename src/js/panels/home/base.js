@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 
 import {
     Div,
@@ -13,18 +13,18 @@ import {
     PullToRefresh,
     Footer,
     Placeholder,
-    FormLayout, Snackbar,
+    FormLayout,
+    Snackbar,
     Alert,
-
 } from '@vkontakte/vkui'
 import {
-    Icon24CheckCircleOutline,
-    Icon28AddOutline, Icon28DeleteOutline, Icon28EditOutline,
+    Icon28AddOutline,
+    Icon28DeleteOutline,
+    Icon28EditOutline,
     Icon28SettingsOutline
 } from '@vkontakte/icons'
 
-function HomePanelBase({router}) {
-    const [notes, setNotes] = useState(null)
+function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote}) {
     const [snackbarDel, setSnackbarDel] = useState(null)
     // eslint-disable-next-line
     async function openSpinner() {
@@ -33,9 +33,6 @@ function HomePanelBase({router}) {
         router.toPopout()
     }
 
-    useEffect(
-        () => {getNotes()}, []
-    )
 
     /*статусы
     0 - открыт
@@ -68,7 +65,7 @@ function HomePanelBase({router}) {
                 onClose={() => setSnackbarDel(null)}
                 before={<Icon28DeleteOutline/>}
             >
-                Заметка удалена! Обнови страницу!
+                Заметка удалена!
             </Snackbar>
         )
     }
@@ -84,7 +81,7 @@ function HomePanelBase({router}) {
                     title: 'Да',
                     autoclose: true,
                     mode: 'destructive',
-                    action: () => {deleteNote(id); openSnackbar()}
+                    action: () => {deleteNote(id); openSnackbar(); getNotes()}
                 }]}
                 onClose={() => router.toPopout()}
                 header='Подтверждение'
@@ -97,20 +94,8 @@ function HomePanelBase({router}) {
         try {
             let token = window.location.search.slice(1).replace(/&/gi, '/');
             let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
+            // eslint-disable-next-line
             let responseJSON = await response.json()
-        }
-        catch (err) {
-            console.log(err)
-        }
-    }
-
-    async function getNotes() {
-        try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.getMyNotes&access_token=${token}`)
-            let responseJSON = await response.json()
-            responseJSON.items.reverse()
-            setNotes(responseJSON)
         }
         catch (err) {
             console.log(err)
@@ -153,10 +138,10 @@ function HomePanelBase({router}) {
                     </Header>
                 }
             >
-                {notes !== null ?
+                {allNotes !== null ?
                     <>
                     {
-                        notes.items.map((el) => {
+                        allNotes.items.map((el) => {
                             return(
                                 <Div>
                                     <Card mode='outline'>
@@ -175,6 +160,7 @@ function HomePanelBase({router}) {
                                                 <Button
                                                     className='btnNote'
                                                     mode='outline'
+                                                    onClick={() => editNote(el.noteId, el.name, el.value, el.status, el.priority)}
                                                     sizeY='regular'
                                                 >
                                                     <Icon28EditOutline/>
@@ -194,7 +180,7 @@ function HomePanelBase({router}) {
                                 </Div>
                             )
                     })}
-                        <Footer>{`Всего заметок: ${notes.count}`}</Footer>
+                        <Footer>{`Всего заметок: ${allNotes.count}`}</Footer>
                     </>
                     : <Placeholder>У вас еще нет заметок</Placeholder>
                 }
