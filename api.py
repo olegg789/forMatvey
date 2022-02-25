@@ -91,8 +91,11 @@ class notes(Resource):
                         if noteId == None:
                                 return {"error": True, "messsage": 'Invalid passed noteId'}, 400
                         else:
-                                resultData = actionDB.deleteNote(int(query_params['vk_user_id']), int(request.args.to_dict().get('noteId')))
+                                resultData = actionDB.deleteNote(int(query_params['vk_user_id']), int(request.args.to_dict().get('noteId')), False)
                                 return resultData
+                    if request.args.to_dict().get('method') == 'notes.deleteAllNotes':
+                        resultData = actionDB.deleteNote(int(query_params['vk_user_id']), None, True)
+                        return resultData
                     else:
                         return {"error": True, "message": 'Invalid passed method'}, 400
                 else:
