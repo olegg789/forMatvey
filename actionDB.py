@@ -41,19 +41,24 @@ def getData(user_id):
     con.commit(); cur.close()
     return [len(rows), items]
 
-def deleteNote(user_id, noteId):
+def deleteNote(user_id, noteId, operation):
     cur = con.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` STRING, `value` STRING, `priority` INT, `status` INT)")
-    cur.execute('SELECT id FROM `allUsers` WHERE noteId = ?', (noteId,))
-    result = cur.fetchall()
-    if len(result) == 0:
-                return {"error": True, "message": 'Incorreclyt passed noteId'}, 400
-    if result[-1][-1] == user_id:
-                cur.execute('DELETE from `allUsers` where noteId = ?', (noteId,))
-                con.commit(); cur.close()
-                return {"message": 'ok'}, 200
+    if operation:
+        cur.execute('DELETE from `allUsers` where id = ?', (user_id,))
+        con.commit(); cur.close()
+        return {"message": 'ok'}, 200
     else:
-                return {"error": True, "message": 'One of the parameters is invalid'}, 400
+        cur.execute('SELECT id FROM `allUsers` WHERE noteId = ?', (noteId,))
+        result = cur.fetchall()
+        if len(result) == 0:
+                    return {"error": True, "message": 'Incorreclyt passed noteId'}, 400
+        if result[-1][-1] == user_id:
+                    cur.execute('DELETE from `allUsers` where noteId = ?', (noteId,))
+                    con.commit(); cur.close()
+                    return {"message": 'ok'}, 200
+        else:
+                    return {"error": True, "message": 'One of the parameters is invalid'}, 400
 
 def editNote(user_id, noteId, name, value, priority, status):
     cur = con.cursor()
