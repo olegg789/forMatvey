@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 
 import {
     PanelHeader,
@@ -6,9 +6,6 @@ import {
     Group,
     SimpleCell,
     Avatar,
-    ScreenSpinner,
-    Title,
-    Gradient,
     Header,
     ANDROID,
     VKCOM,
@@ -22,32 +19,10 @@ import {
 } from "@vkontakte/icons";
 import bridge from "@vkontakte/vk-bridge";
 
-let isInfoUser = false
-let infoUser = ['Загрузка...']
 
 function HomePanelPlaceholder({isDesktop, router}) {
-    const [infoUsers, setInfoUser] = useState(infoUser)
     const platform = isDesktop ? VKCOM : usePlatform()
 
-    useEffect(() => {
-        if (!isInfoUser) {
-            getInfoUser()
-        }
-    })
-
-    async function getInfoUser() {
-        router.toPopout(<ScreenSpinner/>)
-
-        let user_info = await bridge.send('VKWebAppGetUserInfo');
-        infoUser[0] = user_info.first_name + ' ' + user_info.last_name
-        infoUser.push(user_info.photo_200)
-        infoUser.push(user_info.id)
-
-        setInfoUser(infoUser)
-        isInfoUser = true
-
-        router.toPopout()
-    }
 
     return(
         <>
@@ -58,20 +33,6 @@ function HomePanelPlaceholder({isDesktop, router}) {
                 Настройки
             </PanelHeader>
 
-            <Group>
-                <Gradient className={isDesktop ? 'ProfileUserWeb' : 'ProfileUserMobail'}>
-                    <Avatar size={96} src={infoUsers[1]}/>
-
-                    <Title
-                        className='NameUser'
-                        level="2"
-                        weight="2"
-                    >
-                        {infoUsers[0]}
-                    </Title>
-
-                </Gradient>
-            </Group>
                 <Group header={<Header mode="secondary">Прочее</Header>}>
                     <SimpleCell
                         className='btn_settings'

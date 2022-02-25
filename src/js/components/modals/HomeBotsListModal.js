@@ -54,7 +54,7 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
             //console.log(response)
             // eslint-disable-next-line
             let responseJSON = await response.json()
-            console.log(responseJSON)
+
             if (response.ok) {
                 router.toBack()
                 getNotes()

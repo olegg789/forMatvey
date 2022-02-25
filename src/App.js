@@ -20,6 +20,7 @@ import {
 
 import HomeBotsListModal from './js/components/modals/HomeBotsListModal';
 import HomeBotInfoModal from './js/components/modals/HomeBotInfoModal';
+import bridge from "@vkontakte/vk-bridge";
 
 const HomePanelBase = lazy(() => import('./js/panels/home/base'));
 const HomePanelPlaceholder = lazy(() => import('./js/panels/home/placeholder'));
@@ -29,21 +30,39 @@ const App = withAdaptivity(({ viewWidth, router }) => {
   // eslint-disable-next-line
   const setActiveView = (e) => router.toView(e.currentTarget.dataset.id)
 
-    const [notes, setNotes] = useState(null)
+    const [notes, setNotes] = useState('')
     const [noteId, setNoteId] = useState(null)
     const [noteName, setNoteName] = useState(null)
     const [noteValue, setNoteValue] = useState(null)
     const [noteStatus, setNoteStatus] = useState(null)
     const [notePriority, setNotePriority] = useState(null)
+    const [scheme, setScheme] = useState('light')
   const [snackbar, setSnackbar] = useState(null)
 
   const isDesktop = viewWidth >= 3
   const platform = isDesktop ? VKCOM : usePlatform()
   const hasHeader = isDesktop !== true
 
+    async function getAppScheme(platform) {
+      if (platform === 'vkcom') {
+          setScheme('vkcom_light')
+      }
+      else {
+          bridge.subscribe((e) => {
+              if (e.detail.type === 'VKWebAppUpdateConfig') {
+                  let data = e.detail.data.scheme
+                  setScheme(data)
+              }
+          })
+          let appScheme = await bridge.send("VKWebAppGetConfig")
+          setScheme(appScheme.scheme)
+      }
+    }
+
   async function openSnackbar(text, icon) {
     setSnackbar(
         <Snackbar
+            className={!isDesktop && 'snack'}
             layout='vertical'
             onClose={() => setSnackbar(null)}
             before={icon}
@@ -54,7 +73,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
   }
 
   useEffect(
-      () => {getNotes()}, []
+      () => {getNotes(); getAppScheme(platform)}, []
   )
 
     async function getNotes() {
@@ -107,7 +126,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
   );
 
   return(
-    <ConfigProvider platform={platform} isWebView scheme={!isDesktop ? 'client_dark' : 'bright_light'}>
+    <ConfigProvider platform={platform} isWebView scheme={scheme}>
       <AppRoot>
         <SplitLayout
           header={hasHeader && <PanelHeader separator={false} />}

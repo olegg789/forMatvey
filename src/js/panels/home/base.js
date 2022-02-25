@@ -6,7 +6,6 @@ import {
     Button,
     PanelHeader,
     ScreenSpinner,
-    PanelHeaderButton,
     Header,
     Card,
     FormItem,
@@ -21,7 +20,7 @@ import {
     Icon28AddOutline,
     Icon28DeleteOutline,
     Icon28EditOutline,
-    Icon28SettingsOutline
+    Icon56NotePenOutline
 } from '@vkontakte/icons'
 
 function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote}) {
@@ -61,6 +60,7 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote}) {
     function openSnackbar() {
         setSnackbarDel(
             <Snackbar
+                className={!isDesktop && 'snack'}
                 layout='vertical'
                 onClose={() => setSnackbarDel(null)}
                 before={<Icon28DeleteOutline/>}
@@ -107,11 +107,9 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote}) {
             <PullToRefresh onRefresh={() => {openSpinner(); getNotes()}}>
             <PanelHeader
                 left={
-                    <PanelHeaderButton
-                        onClick={() => router.toPanel('placeholder')}
-                    >
-                        <Icon28SettingsOutline/>
-                    </PanelHeaderButton>
+                    <Div>
+                        <Icon56NotePenOutline width={32} height={32} fill='#EC49E7'/>
+                    </Div>
                 }
                 separator={false}
             >
@@ -133,12 +131,20 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote}) {
                 header={
                     <Header
                         mode='secondary'
+                        aside={
+                            <Button
+                                mode='outline'
+                                appearance='negative'
+                        >
+                                Удалить все
+                            </Button>
+                        }
                     >
                         Мои заметки
                     </Header>
                 }
             >
-                {allNotes !== null ?
+                {allNotes !== '' ?
                     <>
                     {
                         allNotes.items.map((el) => {

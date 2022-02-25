@@ -48,10 +48,26 @@ function BotsListModal({id, platform, getNotes, openSnackbar, router, noteId, no
                 getNotes()
                 openSnackbar('Заметка отредактирована!', <Icon28CheckCircleOutline/>)
             }
-            else if (!response.ok) {
-                if (responseJSON.code === 12) {
+            else if (responseJSON.error) {
+                if (responseJSON.code === '12') {
                     router.toBack()
                     openSnackbar('Произошла ошибка, вы ввели некорректное имя. Попробуйте снова!', <Icon28CancelCircleOutline/>)
+                }
+                else if (responseJSON.code === '10') {
+                    router.toBack()
+                    openSnackbar('Произошла ошибка, вы ввели некорректный статус. Попробуйте снова!', <Icon28CancelCircleOutline/>)
+                }
+                else if (responseJSON.code === '11') {
+                    router.toBack()
+                    openSnackbar('Произошла ошибка, вы ввели некорректный приоритет. Попробуйте снова!', <Icon28CancelCircleOutline/>)
+                }
+                else if (responseJSON.code === '13') {
+                    router.toBack()
+                    openSnackbar('Произошла ошибка, вы ввели некорректное значение заметки. Попробуйте снова!', <Icon28CancelCircleOutline/>)
+                }
+                else if (responseJSON.code === '14') {
+                    router.toBack()
+                    openSnackbar('Произошла ошибка, некорректный айди заметки. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
             }
         }
