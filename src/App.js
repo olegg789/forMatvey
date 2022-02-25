@@ -150,6 +150,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                 <Panel id='base'>
                   <Suspense fallback={<ScreenSpinner/>}>
                     <HomePanelBase
+                        openSnackbar={(text, icon) => openSnackbar(text, icon)}
                         editNote={
                             (noteId,
                              noteName,
