@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
     Div,
@@ -135,6 +135,10 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote, openSna
         }
     }
 
+    useEffect(
+        () => {getNotes()}, []
+    )
+
     return (
         <>
             <PullToRefresh onRefresh={() => {openSpinner(); getNotes()}}>
@@ -164,7 +168,7 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote, openSna
                 header={
                     <Header
                         mode='secondary'
-                        aside={allNotes !== '' &&
+                        aside={allNotes.count !== 0 &&
                             <Button
                                 mode='outline'
                                 appearance='negative'
@@ -178,7 +182,7 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote, openSna
                     </Header>
                 }
             >
-                {allNotes !== '' ?
+                {allNotes.count !== 0 ?
                     <>
                     {
                         allNotes.items.map((el) => {

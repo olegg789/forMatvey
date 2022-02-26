@@ -5,7 +5,7 @@ import {
     ModalPageHeader,
     PanelHeaderButton,
     withPlatform,
-    IOS, FormItem, Textarea, Input, Div, Button, FormLayout
+    IOS, FormItem, Textarea, Div, Button, FormLayout, NativeSelect
 } from "@vkontakte/vkui";
 import {Icon24Dismiss, Icon24Cancel, Icon28CheckCircleOutline, Icon28CancelCircleOutline} from '@vkontakte/icons'
 
@@ -15,6 +15,21 @@ function BotsListModal({id, platform, getNotes, openSnackbar, router, noteId, no
     const [value, setValue] = useState(noteValue)
     const [status, setStatus] = useState(noteStatus)
     const [priority, setPriority] = useState(notePriority)
+
+    const statuses = [
+        {value: '0', status: 'Открыт'},
+        {value: '1', status: 'В работе'},
+        {value: '2', status: 'Завершен'},
+        {value: '3', status: 'На рассмотрении'}
+    ]
+
+    const priorities = [
+        {value: '0', priority: 'Низкий'},
+        {value: '1', priority: 'Средний'},
+        {value: '2', priority: 'Высокий'},
+        {value: '3', priority: 'Критический'}
+    ]
+
 
     async function oncChange(e) {
 
@@ -102,7 +117,6 @@ function BotsListModal({id, platform, getNotes, openSnackbar, router, noteId, no
             <FormLayout>
                 <FormItem
                     top='Имя заметки'
-                    bottom='string'
                 >
                     <Textarea
                         name='name'
@@ -114,47 +128,47 @@ function BotsListModal({id, platform, getNotes, openSnackbar, router, noteId, no
                 </FormItem>
                 <FormItem
                     top='Текст заметки'
-                    bottom='string'
                 >
                     <Textarea
                         value={value}
                         name='value'
                         placeholder='Введите значение...'
-                        maxLength={100}
+                        maxLength={300}
                         onChange={(e) => oncChange(e)}
                     />
                 </FormItem>
                 <FormItem
-                    top='Статус заметки'
-                    bottom={`Возможные значения:
-                    0 - открыт,
-                    1 - в работе,
-                    2 - завершен,
-                    3 - на рассмотрении`}
+                    top='Введите статус заметки'
                 >
-                    <Input
-                        value={status}
+                    <NativeSelect
                         name='status'
-                        placeholder='Введите значение...'
-                        type='number'
+                        placeholder='Не выбран'
+                        value={status}
                         onChange={(e) => oncChange(e)}
-                    />
+                    >
+                        {statuses.map((el) => {
+                            return(
+                                <option value={el.value}>{el.status}</option>
+                            )
+
+                        })}
+                    </NativeSelect>
                 </FormItem>
                 <FormItem
-                    top='Приоритет заметки'
-                    bottom='Возможные значения:
-                    0 - низкий,
-                    1 - средний,
-                    2 - высокий,
-                    3 - критический
-                '>
-                    <Input
-                        value={priority}
+                    top='Введите приоритет заметки'
+                >
+                    <NativeSelect
                         name='priority'
-                        placeholder='Введите значение...'
-                        type='number'
+                        placeholder='Не выбран'
+                        value={priority}
                         onChange={(e) => oncChange(e)}
-                    />
+                    >
+                        {priorities.map((el) => {
+                            return(
+                                <option value={el.value}>{el.priority}</option>
+                            )
+                        })}
+                    </NativeSelect>
                 </FormItem>
                 <Div>
                     <Button

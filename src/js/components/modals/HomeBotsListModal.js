@@ -9,9 +9,8 @@ import {
     FormLayout,
     FormItem,
     Textarea,
-    Input,
     Div,
-    Button,
+    Button, NativeSelect,
 } from "@vkontakte/vkui";
 import {
     Icon24Dismiss,
@@ -25,6 +24,20 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
     const [value, setValue] = useState('')
     const [status, setStatus] = useState('')
     const [priority, setPriority] = useState('')
+
+    const statuses = [
+        {value: '0', status: 'Открыт'},
+        {value: '1', status: 'В работе'},
+        {value: '2', status: 'Завершен'},
+        {value: '3', status: 'На рассмотрении'}
+    ]
+
+    const priorities = [
+        {value: '0', priority: 'Низкий'},
+        {value: '1', priority: 'Средний'},
+        {value: '2', priority: 'Высокий'},
+        {value: '3', priority: 'Критический'}
+    ]
 
     async function oncChange(e) {
 
@@ -123,7 +136,6 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
             <FormLayout>
                 <FormItem
                     top='Введите имя заметки'
-                    bottom='string'
                 >
                     <Textarea
                         name='name'
@@ -135,47 +147,45 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
                 </FormItem>
                 <FormItem
                     top='Введите текст заметки'
-                    bottom='string'
                 >
                     <Textarea
                         value={value}
                         name='value'
                         placeholder='Введите значение...'
-                        maxLength={100}
+                        maxLength={300}
                         onChange={(e) => oncChange(e)}
                     />
                 </FormItem>
                 <FormItem
                     top='Введите статус заметки'
-                    bottom={`Возможные значения:
-                    0 - открыт,
-                    1 - в работе,
-                    2 - завершен,
-                    3 - на рассмотрении`}
                 >
-                    <Input
-                        value={status}
+                    <NativeSelect
                         name='status'
-                        placeholder='Введите значение...'
-                        type='number'
+                        placeholder='Не выбран'
                         onChange={(e) => oncChange(e)}
-                    />
+                    >
+                        {statuses.map((el) => {
+                            return(
+                                <option value={el.value}>{el.status}</option>
+                            )
+
+                        })}
+                    </NativeSelect>
                 </FormItem>
                 <FormItem
                     top='Введите приоритет заметки'
-                    bottom='Возможные значения:
-                    0 - низкий,
-                    1 - средний,
-                    2 - высокий,
-                    3 - критический
-                '>
-                    <Input
-                        value={priority}
+                >
+                    <NativeSelect
                         name='priority'
-                        placeholder='Введите значение...'
-                        type='number'
+                        placeholder='Не выбран'
                         onChange={(e) => oncChange(e)}
-                    />
+                    >
+                        {priorities.map((el) => {
+                            return(
+                                <option value={el.value}>{el.priority}</option>
+                            )
+                        })}
+                    </NativeSelect>
                 </FormItem>
                 <Div>
                     <Button

@@ -30,33 +30,32 @@ const App = withAdaptivity(({ viewWidth, router }) => {
   // eslint-disable-next-line
   const setActiveView = (e) => router.toView(e.currentTarget.dataset.id)
 
-    const [notes, setNotes] = useState('')
+    const [notes, setNotes] = useState({count: 0, items: {}})
     const [noteId, setNoteId] = useState(null)
     const [noteName, setNoteName] = useState(null)
     const [noteValue, setNoteValue] = useState(null)
     const [noteStatus, setNoteStatus] = useState(null)
     const [notePriority, setNotePriority] = useState(null)
     const [scheme, setScheme] = useState('light')
-  const [snackbar, setSnackbar] = useState(null)
+    const [snackbar, setSnackbar] = useState(null)
 
-  const isDesktop = viewWidth >= 3
-  const platform = isDesktop ? VKCOM : usePlatform()
-  const hasHeader = isDesktop !== true
+    const isDesktop = viewWidth >= 3
+    const platform = isDesktop ? VKCOM : usePlatform()
+    const hasHeader = isDesktop !== true
 
     async function getAppScheme(platform) {
-      if (platform === 'vkcom') {
-          setScheme('vkcom_light')
-      }
-      else {
-          bridge.subscribe((e) => {
-              if (e.detail.type === 'VKWebAppUpdateConfig') {
-                  let data = e.detail.data.scheme
-                  setScheme(data)
-              }
-          })
-          let appScheme = await bridge.send("VKWebAppGetConfig")
-          setScheme(appScheme.scheme)
-      }
+        if (platform === 'vkcom') {
+            setScheme('vkcom_light')
+        } else {
+            bridge.subscribe((e) => {
+                if (e.detail.type === 'VKWebAppUpdateConfig') {
+                    let data = e.detail.data.scheme
+                    setScheme(data)
+                }
+            })
+            let appScheme = await bridge.send("VKWebAppGetConfig")
+            setScheme(appScheme.scheme)
+        }
     }
 
   async function openSnackbar(text, icon) {
@@ -80,9 +79,11 @@ const App = withAdaptivity(({ viewWidth, router }) => {
         try {
             let token = window.location.search.slice(1).replace(/&/gi, '/');
             let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.getMyNotes&access_token=${token}`)
+            await 1
             let responseJSON = await response.json()
             await responseJSON.items.reverse()
-            await setNotes(responseJSON)
+            setNotes(responseJSON)
+            await 1
         }
         catch (err) {
             console.log(err)
@@ -125,84 +126,82 @@ const App = withAdaptivity(({ viewWidth, router }) => {
     </ModalRoot>
   );
 
-  return(
-    <ConfigProvider platform={platform} isWebView scheme={scheme}>
-      <AppRoot>
-        <SplitLayout
-          header={hasHeader && <PanelHeader separator={false} />}
-          style={{ justifyContent: "center" }}
-        >
-          <SplitCol
-            animate={!isDesktop}
-            spaced={isDesktop}
-            width={isDesktop ? '560px' : '100%'}
-            maxWidth={isDesktop ? '560px' : '100%'}
-          >   
-            <Epic 
-              activeStory={router.activeView}
-            >
-              <View 
-                id='home'
-                activePanel={router.activePanel}
-                popout={router.popout}
-                modal={modals}
-              >
-                <Panel id='base'>
-                  <Suspense fallback={<ScreenSpinner/>}>
-                    <HomePanelBase
-                        openSnackbar={(text, icon) => openSnackbar(text, icon)}
-                        editNote={
-                            (noteId,
-                             noteName,
-                             noteValue,
-                             noteStatus,
-                             notePriority
-                            ) => editNote(
-                                noteId,
-                                noteName,
-                                noteValue,
-                                noteStatus,
-                                notePriority
-                            )
-                        }
-                        allNotes={notes}
-                        getNotes={() => getNotes()}
-                        router={router}
-                        isDesktop={isDesktop}
-                    />
-                  </Suspense>
-                  {snackbar}
-                </Panel>
+    return(
+        <ConfigProvider platform={platform} isWebView scheme={scheme}>
+            <AppRoot>
+                <SplitLayout
+                    header={hasHeader && <PanelHeader separator={false} />}
+                    style={{ justifyContent: "center" }}
+                >
+                    <SplitCol
+                        animate={!isDesktop}
+                        spaced={isDesktop}
+                        width={isDesktop ? '560px' : '100%'}
+                        maxWidth={isDesktop ? '560px' : '100%'}
+                    >
+                    <Epic
+                        activeStory={router.activeView}
+                    >
+                        <View
+                            id='home'
+                            activePanel={router.activePanel}
+                            popout={router.popout}
+                            modal={modals}
+                        >
+                            <Panel id='base'>
+                                <Suspense fallback={<ScreenSpinner/>}>
+                                    <HomePanelBase
+                                        openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                                        editNote={
+                                            (noteId,
+                                             noteName,
+                                             noteValue,
+                                             noteStatus,
+                                             notePriority
+                                            ) => editNote(
+                                                noteId,
+                                                noteName,
+                                                noteValue,
+                                                noteStatus,
+                                                notePriority
+                                            )
+                                        }
+                                        allNotes={notes}
+                                        getNotes={() => getNotes()}
+                                        router={router}
+                                        isDesktop={isDesktop}
+                                    />
+                                  </Suspense>
+                                {snackbar}
+                            </Panel>
 
-                <Panel id='placeholder'>
-                  <Suspense fallback={<ScreenSpinner/>}>
-                    <HomePanelPlaceholder router={router} platform={platform}/>
-                  </Suspense>
-                </Panel>
-              </View>
+                    <Panel id='placeholder'>
+                      <Suspense fallback={<ScreenSpinner/>}>
+                        <HomePanelPlaceholder router={router} platform={platform}/>
+                      </Suspense>
+                    </Panel>
+                  </View>
 
-              <View 
-                id="profile"
-                activePanel={router.activePanel}
-                popout={router.popout}
-                modal={modals}
-              >
-                <Panel id='base'>
-                  <Suspense fallback={<ScreenSpinner/>}>
-                    <ProfilePanelBase 
-                      router={router}
-                      isDesktop={isDesktop}
-                    />
-                  </Suspense>
-                </Panel>
-              </View>
-            </Epic>
-          </SplitCol>
-
-            
-        </SplitLayout>
-      </AppRoot>
-    </ConfigProvider>
+                  <View
+                    id="profile"
+                    activePanel={router.activePanel}
+                    popout={router.popout}
+                    modal={modals}
+                  >
+                    <Panel id='base'>
+                      <Suspense fallback={<ScreenSpinner/>}>
+                        <ProfilePanelBase
+                          router={router}
+                          isDesktop={isDesktop}
+                        />
+                      </Suspense>
+                    </Panel>
+                  </View>
+                </Epic>
+                    </SplitCol>
+                </SplitLayout>
+            </AppRoot>
+        </ConfigProvider>
   )
 }, { viewWidth: true })
 
