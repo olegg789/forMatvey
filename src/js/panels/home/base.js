@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {lazy, useEffect, useState} from 'react';
 
 import {
     Div,
@@ -7,51 +7,54 @@ import {
     PanelHeader,
     ScreenSpinner,
     Header,
-    Card,
-    FormItem,
     PullToRefresh,
-    Footer,
     Placeholder,
-    FormLayout,
     Snackbar,
     Alert,
+    Tabs,
+    TabsItem, HorizontalScroll,
 } from '@vkontakte/vkui'
 import {
     Icon28AddOutline, Icon28CheckCircleOutline,
     Icon28DeleteOutline,
-    Icon28EditOutline, Icon28ErrorCircleOutline,
+    Icon28ErrorCircleOutline,
     Icon56NotePenOutline
 } from '@vkontakte/icons'
 
-function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote, openSnackbar}) {
+const AllNotes = lazy(() => import('./allNotes'));
+const MinorNotes = lazy(() => import('./minorNotes'));
+const MiddleNotes = lazy(() => import('./middleNotes'));
+const MajorNotes = lazy(() => import('./majorNotes'));
+const CriticalNotes = lazy(() => import('./criticalNotes'))
+
+function HomePanelBase(
+    {
+        router,
+        minorNotes,
+        getMinorNotes,
+        allNotes,
+        getNotes,
+        isDesktop,
+        editNote,
+        openSnackbar,
+        sortNotes,
+        middleNotes,
+        getMiddleNotes,
+        majorNotes,
+        getMajorNotes,
+        criticalNotes,
+        getCriticalNotes
+    }) {
+
+    // eslint-disable-next-line
     const [snackbarDel, setSnackbarDel] = useState(null)
+    const [activeTab, setActiveTab] = useState('all')
     // eslint-disable-next-line
     async function openSpinner() {
         router.toPopout(<ScreenSpinner/>)
         await new Promise(resolve => setTimeout(resolve, 2000))
         router.toPopout()
     }
-
-
-    /*статусы
-    0 - открыт
-    1 - в работе
-    2 - завершен
-    3 - на рассмотрении
-     */
-    const statuses = [
-        'Открыт',
-        'В работе',
-        'Завершен',
-        'На рассмотрении',
-    ]
-
-    const priorites = [
-        'Низкий',
-        "Средний",
-        "Высокий",
-        "Критический"
-    ]
 
     async function addNote() {
         router.toModal('addNote');
@@ -70,6 +73,7 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote, openSna
         )
     }
 
+    // eslint-disable-next-line
     function openAlert(id) {
         router.toPopout(
             <Alert
@@ -136,7 +140,7 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote, openSna
     }
 
     useEffect(
-        () => {getNotes()}, []
+        () => {getNotes(); setActiveTab('all')}, []
     )
 
     return (
@@ -158,13 +162,14 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote, openSna
                         stretched
                         size='l'
                         before={<Icon28AddOutline/>}
-                        onClick={() => addNote()}
+                        onClick={() => {addNote(); setActiveTab('all')}}
                     >
                         Создать заметку
                     </Button>
                 </Div>
             </Group>
             <Group
+                separator='hide'
                 header={
                     <Header
                         mode='secondary'
@@ -184,47 +189,61 @@ function HomePanelBase({router, allNotes, getNotes, isDesktop, editNote, openSna
             >
                 {allNotes.count !== 0 ?
                     <>
-                    {
-                        allNotes.items.map((el) => {
-                            return(
-                                <Div>
-                                    <Card mode='outline'>
-                                        <FormLayout>
-                                            <FormItem
-                                                top={
-                                                    el.name
-                                                }
-                                                bottom={
-                                                    `Статус: ${statuses[el.status]}, приоритет: ${priorites[el.priority]}`
-                                                }
-                                            >
-                                                {el.value}
-                                            </FormItem>
-                                            <FormItem>
-                                                <Button
-                                                    className='btnNote'
-                                                    mode='outline'
-                                                    onClick={() => editNote(el.noteId, el.name, el.value, el.status, el.priority)}
-                                                    sizeY='regular'
-                                                >
-                                                    <Icon28EditOutline/>
-                                                </Button>
-                                                <Button
-                                                    className='btnNote'
-                                                    mode='outline'
-                                                    appearance='negative'
-                                                    sizeY='regular'
-                                                    onClick={() => openAlert(el.noteId)}
-                                                >
-                                                    <Icon28DeleteOutline/>
-                                                </Button>
-                                            </FormItem>
-                                        </FormLayout>
-                                    </Card>
-                                </Div>
-                            )
-                    })}
-                        <Footer>{`Всего заметок: ${allNotes.count}`}</Footer>
+                        <Div>
+                            <Group>
+                                <Tabs mode="buttons">
+                                    <HorizontalScroll>
+                                        <TabsItem
+                                            className='all'
+                                            selected={activeTab === 'all'}
+                                            onClick={() => setActiveTab('all')}
+                                        >
+                                            Все
+                                        </TabsItem>
+                                        <TabsItem
+                                            onClick={() => setActiveTab('minor')}
+                                            selected={activeTab === 'minor'}
+                                        >
+                                            Низкий
+                                        </TabsItem>
+                                        <TabsItem
+                                            onClick={() => setActiveTab('middle')}
+                                            selected={activeTab === 'middle'}
+                                        >
+                                            Средний
+                                        </TabsItem>
+                                        <TabsItem
+                                            onClick={() => setActiveTab('major')}
+                                            selected={activeTab === 'major'}
+                                        >
+                                            Высокий
+                                        </TabsItem>
+                                        <TabsItem
+                                            onClick={() => setActiveTab('critical')}
+                                            selected={activeTab === 'critical'}
+                                        >
+                                            Критический
+                                        </TabsItem>
+                                    </HorizontalScroll>
+                                </Tabs>
+                            </Group>
+                        </Div>
+                        {activeTab === 'all' &&
+                            <AllNotes allNotes={allNotes} router={router} getNotes={getNotes} editNote={editNote} deleteNote={(id) => deleteNote(id)}/>
+                        }
+                        {activeTab === 'minor' &&
+                            <MinorNotes getNotes={getNotes} getMinorNotes={getMinorNotes} minorNotes={minorNotes} router={router} editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => editNote(noteId, noteName, noteValue, noteStatus, notePriority)} deleteNote={(id) => deleteNote(id)}/>
+                        }
+                        {activeTab === 'middle' &&
+                            <MiddleNotes getNotes={getNotes} getMiddleNotes={getMiddleNotes} middleNotes={middleNotes} router={router} editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => editNote(noteId, noteName, noteValue, noteStatus, notePriority)} deleteNote={(id) => deleteNote(id)}/>
+                        }
+                        {activeTab === 'major' &&
+                            <MajorNotes getNotes={getNotes} getMajorNotes={getMajorNotes} majorNotes={majorNotes} router={router} editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => editNote(noteId, noteName, noteValue, noteStatus, notePriority)} deleteNote={(id) => deleteNote(id)}/>
+                        }
+                        {activeTab === 'critical' &&
+                            <CriticalNotes getNotes={getNotes} getCriticalNotes={getCriticalNotes} criticalNotes={criticalNotes} router={router} editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => editNote(noteId, noteName, noteValue, noteStatus, notePriority)} deleteNote={(id) => deleteNote(id)}/>
+                        }
+
                     </>
                     : <Placeholder>У вас еще нет заметок</Placeholder>
                 }

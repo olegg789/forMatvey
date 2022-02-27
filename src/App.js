@@ -38,10 +38,74 @@ const App = withAdaptivity(({ viewWidth, router }) => {
     const [notePriority, setNotePriority] = useState(null)
     const [scheme, setScheme] = useState('light')
     const [snackbar, setSnackbar] = useState(null)
+    const [minorNotes, setMinorNotes] = useState({count: 0, items: {}})
+    const [middleNotes, setMiddleNotes] = useState({count: 0, items: {}})
+    const [majorNotes, setMajorNotes] = useState({count: 0, items: {}})
+    const [criticalNotes, setCriticalNotes] = useState({count: 0, items: {}})
 
     const isDesktop = viewWidth >= 3
     const platform = isDesktop ? VKCOM : usePlatform()
     const hasHeader = isDesktop !== true
+
+    async function getMinorNotes() {
+        try {
+            let token = window.location.search.slice(1).replace(/&/gi, '/');
+            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.sortByPriority&access_token=${token}&priority=0`)
+            await 1
+            let responseJSON = await response.json()
+            await responseJSON.items.reverse()
+            setMinorNotes(responseJSON)
+            await 1
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
+
+    async function getMiddleNotes() {
+        try {
+            let token = window.location.search.slice(1).replace(/&/gi, '/');
+            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.sortByPriority&access_token=${token}&priority=1`)
+            await 1
+            let responseJSON = await response.json()
+            await responseJSON.items.reverse()
+            setMiddleNotes(responseJSON)
+            await 1
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
+
+    async function getMajorNotes() {
+        try {
+            let token = window.location.search.slice(1).replace(/&/gi, '/');
+            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.sortByPriority&access_token=${token}&priority=2`)
+            await 1
+            let responseJSON = await response.json()
+            await responseJSON.items.reverse()
+            setMajorNotes(responseJSON)
+            await 1
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
+
+    async function getCriticalNotes() {
+        try {
+            let token = window.location.search.slice(1).replace(/&/gi, '/');
+            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.sortByPriority&access_token=${token}&priority=3`)
+            await 1
+            let responseJSON = await response.json()
+            await responseJSON.items.reverse()
+            setCriticalNotes(responseJSON)
+            await 1
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
 
     async function getAppScheme(platform) {
         if (platform === 'vkcom') {
@@ -72,7 +136,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
   }
 
   useEffect(
-      () => {getNotes(); getAppScheme(platform)}, []
+      () => {getNotes(); getAppScheme(platform); getMinorNotes(); getMiddleNotes(); getMajorNotes(); getCriticalNotes()}, []
   )
 
     async function getNotes() {
@@ -115,6 +179,10 @@ const App = withAdaptivity(({ viewWidth, router }) => {
           onClose={() => router.toBack()}
           getNotes = {() => getNotes()}
           id="editNote"
+          getMinorNotes={() => getMinorNotes()}
+          getMiddleNotes={() => getMiddleNotes()}
+          getMajorNotes={() => getMajorNotes()}
+          getCriticalNotes={() => getCriticalNotes()}
           noteId={noteId}
           noteName={noteName}
           noteValue={noteValue}
@@ -166,12 +234,20 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                                                 notePriority
                                             )
                                         }
+                                        minorNotes={minorNotes}
+                                        middleNotes={middleNotes}
+                                        getMiddleNotes={() => getMiddleNotes()}
+                                        majorNotes={majorNotes}
+                                        getMajorNotes={() => getMajorNotes()}
+                                        criticalNotes={criticalNotes}
+                                        getCriticalNotes={() => getCriticalNotes()}
+                                        getMinorNotes={() => getMinorNotes()}
                                         allNotes={notes}
                                         getNotes={() => getNotes()}
                                         router={router}
                                         isDesktop={isDesktop}
                                     />
-                                  </Suspense>
+                                </Suspense>
                                 {snackbar}
                             </Panel>
 

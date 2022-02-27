@@ -9,7 +9,7 @@ import {
 } from "@vkontakte/vkui";
 import {Icon24Dismiss, Icon24Cancel, Icon28CheckCircleOutline, Icon28CancelCircleOutline} from '@vkontakte/icons'
 
-function BotsListModal({id, platform, getNotes, openSnackbar, router, noteId, noteName, noteValue, noteStatus, notePriority}) {
+function BotsListModal({id, getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNotes, platform, getNotes, openSnackbar, router, noteId, noteName, noteValue, noteStatus, notePriority}) {
 
     const [note, setNote] = useState(noteName)
     const [value, setValue] = useState(noteValue)
@@ -61,6 +61,10 @@ function BotsListModal({id, platform, getNotes, openSnackbar, router, noteId, no
             if (response.ok) {
                 router.toBack()
                 getNotes()
+                getMinorNotes()
+                getMiddleNotes()
+                getMajorNotes()
+                getCriticalNotes()
                 openSnackbar('Заметка отредактирована!', <Icon28CheckCircleOutline/>)
             }
             else if (responseJSON.error) {
