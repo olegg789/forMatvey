@@ -24,6 +24,8 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
     const [value, setValue] = useState('')
     const [status, setStatus] = useState('')
     const [priority, setPriority] = useState('')
+    const [countName, setCountName] = useState('0/100')
+    const [countValue, setCountValue] = useState('0/300')
 
     const statuses = [
         {value: '0', status: 'Открыт'},
@@ -45,10 +47,12 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
 
         if (name === 'name') {
             setNote(value)
+            setCountName(`${note.length}/100`)
         }
 
         else if (name === 'value') {
             setValue(value)
+            setCountValue(`${value.length}/300`)
         }
 
         else if (name === 'status') {
@@ -136,6 +140,7 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
             <FormLayout>
                 <FormItem
                     top='Введите имя заметки'
+                    bottom={countName}
                 >
                     <Textarea
                         name='name'
@@ -147,6 +152,7 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
                 </FormItem>
                 <FormItem
                     top='Введите текст заметки'
+                    bottom={countValue}
                 >
                     <Textarea
                         value={value}
