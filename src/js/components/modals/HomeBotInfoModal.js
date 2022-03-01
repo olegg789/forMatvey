@@ -15,6 +15,8 @@ function BotsListModal({id, getMinorNotes, getMiddleNotes, getMajorNotes, getCri
     const [value, setValue] = useState(noteValue)
     const [status, setStatus] = useState(noteStatus)
     const [priority, setPriority] = useState(notePriority)
+    const [countName, setCountName] = useState(`${noteName.length}/100`)
+    const [countValue, setCountValue] = useState(`${noteValue.length}/300`)
 
     const statuses = [
         {value: '0', status: 'Открыт'},
@@ -37,10 +39,12 @@ function BotsListModal({id, getMinorNotes, getMiddleNotes, getMajorNotes, getCri
 
         if (name === 'name') {
             setNote(value)
+            setCountName(`${value.length}/100`)
         }
 
         else if (name === 'value') {
             setValue(value)
+            setCountValue(`${value.length}/300`)
         }
 
         else if (name === 'status') {
@@ -121,6 +125,7 @@ function BotsListModal({id, getMinorNotes, getMiddleNotes, getMajorNotes, getCri
             <FormLayout>
                 <FormItem
                     top='Имя заметки'
+                    bottom={countName}
                 >
                     <Textarea
                         name='name'
@@ -132,6 +137,7 @@ function BotsListModal({id, getMinorNotes, getMiddleNotes, getMajorNotes, getCri
                 </FormItem>
                 <FormItem
                     top='Текст заметки'
+                    bottom={countValue}
                 >
                     <Textarea
                         value={value}

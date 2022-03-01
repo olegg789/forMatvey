@@ -201,16 +201,10 @@ function HomePanelBase(
                                             Все
                                         </TabsItem>
                                         <TabsItem
-                                            onClick={() => setActiveTab('minor')}
-                                            selected={activeTab === 'minor'}
+                                            onClick={() => setActiveTab('critical')}
+                                            selected={activeTab === 'critical'}
                                         >
-                                            Низкий
-                                        </TabsItem>
-                                        <TabsItem
-                                            onClick={() => setActiveTab('middle')}
-                                            selected={activeTab === 'middle'}
-                                        >
-                                            Средний
+                                            Критический
                                         </TabsItem>
                                         <TabsItem
                                             onClick={() => setActiveTab('major')}
@@ -219,10 +213,16 @@ function HomePanelBase(
                                             Высокий
                                         </TabsItem>
                                         <TabsItem
-                                            onClick={() => setActiveTab('critical')}
-                                            selected={activeTab === 'critical'}
+                                            onClick={() => setActiveTab('middle')}
+                                            selected={activeTab === 'middle'}
                                         >
-                                            Критический
+                                            Средний
+                                        </TabsItem>
+                                        <TabsItem
+                                            onClick={() => setActiveTab('minor')}
+                                            selected={activeTab === 'minor'}
+                                        >
+                                            Низкий
                                         </TabsItem>
                                     </HorizontalScroll>
                                 </Tabs>

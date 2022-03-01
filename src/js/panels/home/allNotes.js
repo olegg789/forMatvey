@@ -92,7 +92,7 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
                             <FormLayout>
                                 <FormItem
                                     top={
-                                        <Header mode='secondary'>{el.name}</Header>
+                                        el.name
                                     }
                                     bottom={
                                         <>

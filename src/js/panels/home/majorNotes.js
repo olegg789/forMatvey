@@ -92,7 +92,7 @@ function MajorNotes({majorNotes, getMajorNotes, router, isDesktop, editNote, ope
                             <FormLayout>
                                 <FormItem
                                     top={
-                                        <Header mode='secondary'>{el.name}</Header>
+                                        el.name
                                     }
                                     bottom={
                                         <>

@@ -47,7 +47,7 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
 
         if (name === 'name') {
             setNote(value)
-            setCountName(`${note.length}/100`)
+            setCountName(`${value.length}/100`)
         }
 
         else if (name === 'value') {
