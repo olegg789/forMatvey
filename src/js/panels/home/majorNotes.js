@@ -5,7 +5,7 @@ import {
     Div,
     Footer,
     FormItem,
-    FormLayout, Snackbar
+    FormLayout, Snackbar, Header
 } from "@vkontakte/vkui";
 
 import {
@@ -92,7 +92,7 @@ function MajorNotes({majorNotes, getMajorNotes, router, isDesktop, editNote, ope
                             <FormLayout>
                                 <FormItem
                                     top={
-                                        el.name
+                                        <Header mode='secondary'>{el.name}</Header>
                                     }
                                     bottom={
                                         <>
