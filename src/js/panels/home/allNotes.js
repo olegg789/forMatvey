@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
     Alert,
     Button,
@@ -5,24 +6,16 @@ import {
     Div,
     Footer,
     FormItem,
-    FormLayout, Snackbar, Header
+    FormLayout, 
+    Snackbar
 } from "@vkontakte/vkui";
-
 import {
     Icon28DeleteOutline,
     Icon28EditOutline
 } from "@vkontakte/icons";
-import React, {useEffect, useState} from "react";
 
 function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes}) {
-
-    // eslint-disable-next-line
     const [snackbarDel, setSnackbarDel] = useState(null)
-
-    useEffect(
-        () => {getNotes()}, []
-    )
-
 
     const statuses = [
         'Открыт',
@@ -38,7 +31,7 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
         "Критический"
     ]
 
-    function openAlert(id) {
+    function openAlert(id, index) {
         router.toPopout(
             <Alert
                 actions={[{
@@ -49,7 +42,7 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
                     title: 'Да',
                     autoclose: true,
                     mode: 'destructive',
-                    action: () => {deleteNote(id); openSnackbarDel(); getNotes()}
+                    action: () => deleteNote(id, index)
                 }]}
                 onClose={() => router.toPopout()}
                 header='Подтверждение'
@@ -58,12 +51,17 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
         )
     }
 
-    async function deleteNote(id) {
+    async function deleteNote(id, index) {
         try {
             let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
-            // eslint-disable-next-line
-            let responseJSON = await response.json()
+            await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
+
+            let arr = allNotes
+            arr.items.splice(index, 1);
+            arr.count -= 1
+            getNotes(arr, false)
+
+            openSnackbarDel();
         }
         catch (err) {
             console.log(err)
@@ -85,7 +83,7 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
 
     return (
         <>
-            {allNotes.items.map((el) => {
+            {allNotes.items.map((el, index) => {
                 return (
                     <Div>
                         <Card mode='outline'>
@@ -117,7 +115,7 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
                                         mode='outline'
                                         appearance='negative'
                                         sizeY='regular'
-                                        onClick={() => openAlert(el.noteId)}
+                                        onClick={() => openAlert(el.noteId, index)}
                                     >
                                         <Icon28DeleteOutline/>
                                     </Button>
@@ -128,6 +126,7 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
                 )
             })}
             <Footer>Всего заметок {allNotes.count}</Footer>
+            {snackbarDel}
         </>
     )
 };

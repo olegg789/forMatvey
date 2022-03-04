@@ -26,11 +26,13 @@ const HomePanelBase = lazy(() => import('./js/panels/home/base'));
 const HomePanelPlaceholder = lazy(() => import('./js/panels/home/placeholder'));
 const ProfilePanelBase = lazy(() => import('./js/panels/profile/base'));
 
-const App = withAdaptivity(({ viewWidth, router }) => {
-  // eslint-disable-next-line
-  const setActiveView = (e) => router.toView(e.currentTarget.dataset.id)
+let isFetchApi = false
 
-    const [notes, setNotes] = useState({count: 0, items: {}})
+const App = withAdaptivity(({ viewWidth, router }) => {
+    // eslint-disable-next-line
+    const setActiveView = (e) => router.toView(e.currentTarget.dataset.id)
+
+    const [notes, setNotes] = useState({count: 0, items: []})
     const [noteId, setNoteId] = useState(null)
     const [noteName, setNoteName] = useState(null)
     const [noteValue, setNoteValue] = useState(null)
@@ -38,73 +40,62 @@ const App = withAdaptivity(({ viewWidth, router }) => {
     const [notePriority, setNotePriority] = useState(null)
     const [scheme, setScheme] = useState('light')
     const [snackbar, setSnackbar] = useState(null)
-    const [minorNotes, setMinorNotes] = useState({count: 0, items: {}})
-    const [middleNotes, setMiddleNotes] = useState({count: 0, items: {}})
-    const [majorNotes, setMajorNotes] = useState({count: 0, items: {}})
-    const [criticalNotes, setCriticalNotes] = useState({count: 0, items: {}})
+    const [minorNotes, setMinorNotes] = useState({count: 0, items: []})
+    const [middleNotes, setMiddleNotes] = useState({count: 0, items: []})
+    const [majorNotes, setMajorNotes] = useState({count: 0, items: []})
+    const [criticalNotes, setCriticalNotes] = useState({count: 0, items: []})
 
-    const isDesktop = viewWidth >= 3
-    const platform = isDesktop ? VKCOM : usePlatform()
-    const hasHeader = isDesktop !== true
+    useEffect(() => {
+        getAppScheme(platform); 
 
-    async function getMinorNotes() {
-        try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.sortByPriority&access_token=${token}&priority=0`)
-            await 1
-            let responseJSON = await response.json()
-            await responseJSON.items.reverse()
-            setMinorNotes(responseJSON)
-            await 1
-        }
-        catch (err) {
-            console.log(err)
+        getNotes(); 
+    }, [])
+
+    async function getNotes(value, isFetch) {
+        if (!isFetchApi || isFetch) {
+            try {
+                let token = window.location.search.slice(1).replace(/&/gi, '/');
+                let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.getMyNotes&access_token=${token}`)
+                let responseJSON = await response.json()
+                responseJSON.items.reverse()
+                await setNotes(responseJSON)
+
+                isFetchApi = true
+                getMinorNotes(responseJSON);
+            } catch (err) {
+                console.log(err)
+            }
+        } else {
+            setNotes(value)
+            getMinorNotes(value);
         }
     }
 
-    async function getMiddleNotes() {
-        try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.sortByPriority&access_token=${token}&priority=1`)
-            await 1
-            let responseJSON = await response.json()
-            await responseJSON.items.reverse()
-            setMiddleNotes(responseJSON)
-            await 1
-        }
-        catch (err) {
-            console.log(err)
-        }
+    async function getMinorNotes(value) {
+        const result = value.items.filter(note => note.priority === 0);
+        console.log(value)
+        setMinorNotes({ count: result.length, items: result })
+
+        getMiddleNotes(value);
     }
 
-    async function getMajorNotes() {
-        try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.sortByPriority&access_token=${token}&priority=2`)
-            await 1
-            let responseJSON = await response.json()
-            await responseJSON.items.reverse()
-            setMajorNotes(responseJSON)
-            await 1
-        }
-        catch (err) {
-            console.log(err)
-        }
+    async function getMiddleNotes(value) {
+        const result = value.items.filter(note => note.priority === 1);
+        setMiddleNotes({ count: result.length, items: result })
+
+        getMajorNotes(value); 
     }
 
-    async function getCriticalNotes() {
-        try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.sortByPriority&access_token=${token}&priority=3`)
-            await 1
-            let responseJSON = await response.json()
-            await responseJSON.items.reverse()
-            setCriticalNotes(responseJSON)
-            await 1
-        }
-        catch (err) {
-            console.log(err)
-        }
+    async function getMajorNotes(value) {
+        const result = value.items.filter(note => note.priority === 2);
+        setMajorNotes({ count: result.length, items: result })
+
+        getCriticalNotes(value)
+    }
+
+    async function getCriticalNotes(value) {
+        const result = value.items.filter(note => note.priority === 3);
+        setCriticalNotes({ count: result.length, items: result })
     }
 
     async function getAppScheme(platform) {
@@ -122,36 +113,17 @@ const App = withAdaptivity(({ viewWidth, router }) => {
         }
     }
 
-  async function openSnackbar(text, icon) {
-    setSnackbar(
-        <Snackbar
-            className={!isDesktop && 'snack'}
-            layout='vertical'
-            onClose={() => setSnackbar(null)}
-            before={icon}
-        >
-          {text}
-        </Snackbar>
-    )
-  }
-
-  useEffect(
-      () => {getNotes(); getAppScheme(platform); getMinorNotes(); getMiddleNotes(); getMajorNotes(); getCriticalNotes()}, []
-  )
-
-    async function getNotes() {
-        try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.getMyNotes&access_token=${token}`)
-            await 1
-            let responseJSON = await response.json()
-            await responseJSON.items.reverse()
-            setNotes(responseJSON)
-            await 1
-        }
-        catch (err) {
-            console.log(err)
-        }
+    async function openSnackbar(text, icon) {
+        setSnackbar(
+            <Snackbar
+                className={!isDesktop && 'snack'}
+                layout='vertical'
+                onClose={() => setSnackbar(null)}
+                before={icon}
+            >
+              {text}
+            </Snackbar>
+        )
     }
 
     async function editNote(noteId, noteName, noteValue, noteStatus, notePriority) {
@@ -163,36 +135,45 @@ const App = withAdaptivity(({ viewWidth, router }) => {
       router.toModal('editNote')
     }
 
-  const modals = (
-    <ModalRoot activeModal={router.modal}>
-      <HomeBotsListModal
-        id="addNote"
-        openSnackbar = {(text, icon) => openSnackbar(text, icon)}
-        platform={platform}
-        onClose={() => router.toBack()}
-        router={router}
-        getNotes = {() => getNotes()}
-      />
+    const isDesktop = viewWidth >= 3
+    const platform = isDesktop ? VKCOM : usePlatform()
+    const hasHeader = isDesktop !== true
 
-      <HomeBotInfoModal
-          openSnackbar = {(text, icon) => openSnackbar(text, icon)}
-          onClose={() => router.toBack()}
-          getNotes = {() => getNotes()}
-          id="editNote"
-          getMinorNotes={() => getMinorNotes()}
-          getMiddleNotes={() => getMiddleNotes()}
-          getMajorNotes={() => getMajorNotes()}
-          getCriticalNotes={() => getCriticalNotes()}
-          noteId={noteId}
-          noteName={noteName}
-          noteValue={noteValue}
-          noteStatus={noteStatus}
-          notePriority={notePriority}
-        platform={platform}
-        router={router}
-      />
-    </ModalRoot>
-  );
+    const modals = (
+        <ModalRoot activeModal={router.modal}>
+            <HomeBotsListModal
+                id="addNote"
+                openSnackbar = {(text, icon) => openSnackbar(text, icon)}
+                getNotes={(value) => getNotes(value)}
+                platform={platform}
+                onClose={() => router.toBack()}
+                router={router}
+                notes={notes}
+                setMinorNotes={(value) => setMinorNotes(value)}
+                setMiddleNotes={(value) => setMiddleNotes(value)}
+                setMajorNotes={(value) => setMajorNotes(value)}
+                setCriticalNotes={(value) => setCriticalNotes(value)}
+            />
+
+            <HomeBotInfoModal
+                openSnackbar = {(text, icon) => openSnackbar(text, icon)}
+                onClose={() => router.toBack()}
+                getNotes={() => getNotes('', true)}
+                id="editNote"
+                getMinorNotes={() => getMinorNotes()}
+                getMiddleNotes={() => getMiddleNotes()}
+                getMajorNotes={() => getMajorNotes()}
+                getCriticalNotes={() => getCriticalNotes()}
+                noteId={noteId}
+                noteName={noteName}
+                noteValue={noteValue}
+                noteStatus={noteStatus}
+                notePriority={notePriority}
+                platform={platform}
+                router={router}
+            />
+        </ModalRoot>
+    );
 
     return(
         <ConfigProvider platform={platform} isWebView scheme={scheme}>
@@ -236,14 +217,11 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                                         }
                                         minorNotes={minorNotes}
                                         middleNotes={middleNotes}
-                                        getMiddleNotes={() => getMiddleNotes()}
                                         majorNotes={majorNotes}
-                                        getMajorNotes={() => getMajorNotes()}
                                         criticalNotes={criticalNotes}
-                                        getCriticalNotes={() => getCriticalNotes()}
-                                        getMinorNotes={() => getMinorNotes()}
+                                        setCriticalNotes={(value) => setCriticalNotes(value)}
                                         allNotes={notes}
-                                        getNotes={() => getNotes()}
+                                        getNotes={(value, isFetch) => getNotes(value, isFetch)}
                                         router={router}
                                         isDesktop={isDesktop}
                                     />
@@ -278,7 +256,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                 </SplitLayout>
             </AppRoot>
         </ConfigProvider>
-  )
+    )
 }, { viewWidth: true })
 
 export default withRouter(App);

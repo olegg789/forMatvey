@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
     Alert,
     Button,
@@ -5,24 +6,16 @@ import {
     Div,
     Footer,
     FormItem,
-    FormLayout, Snackbar, Header
+    FormLayout, 
+    Snackbar,
 } from "@vkontakte/vkui";
-
 import {
     Icon28DeleteOutline,
     Icon28EditOutline
 } from "@vkontakte/icons";
-import React, {useEffect, useState} from "react";
 
-function MinorNotes({minorNotes, getMinorNotes, router, isDesktop, editNote, openSnackbar, getNotes}) {
-
-    // eslint-disable-next-line
+function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allNotes, getNotes}) {
     const [snackbarDel, setSnackbarDel] = useState(null)
-
-    useEffect(
-        () => {getMinorNotes()}, []
-    )
-
 
     const statuses = [
         'Открыт',
@@ -49,7 +42,7 @@ function MinorNotes({minorNotes, getMinorNotes, router, isDesktop, editNote, ope
                     title: 'Да',
                     autoclose: true,
                     mode: 'destructive',
-                    action: () => {deleteNote(id); openSnackbarDel(); getNotes()}
+                    action: () => deleteNote(id)
                 }]}
                 onClose={() => router.toPopout()}
                 header='Подтверждение'
@@ -61,11 +54,20 @@ function MinorNotes({minorNotes, getMinorNotes, router, isDesktop, editNote, ope
     async function deleteNote(id) {
         try {
             let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
-            // eslint-disable-next-line
-            let responseJSON = await response.json()
-        }
-        catch (err) {
+            await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
+
+            allNotes.items.forEach((el, index) => {
+                if (el.noteId === id) {
+                    let arr = allNotes
+                    arr.items.splice(index, 1);
+                    arr.count -= 1
+                    getNotes(arr, false)
+
+                    openSnackbarDel()
+                    return
+                }
+            })
+        } catch (err) {
             console.log(err)
         }
     }
@@ -128,6 +130,7 @@ function MinorNotes({minorNotes, getMinorNotes, router, isDesktop, editNote, ope
                 )
             })}
             <Footer>Всего заметок {minorNotes.count}</Footer>
+            {snackbarDel}
         </>
     )
 };
