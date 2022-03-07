@@ -19,7 +19,7 @@ import {
     Icon28CancelCircleOutline,
 } from '@vkontakte/icons'
 
-function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
+function BotsListModal({id, platform, router, openSnackbar, notes, getNotes}) {
     const [note, setNote] = useState('')
     const [value, setValue] = useState('')
     const [status, setStatus] = useState('')
@@ -73,8 +73,18 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
             let responseJSON = await response.json()
 
             if (response.ok) {
+                let arr = notes
+                arr.count += 1
+                arr.items.unshift({
+                    noteId: responseJSON.noteId,
+                    name: note,
+                    priority: Number(priority),
+                    status: Number(status),
+                    value: value.replace(/&/gi, '¦'),
+                })
+                getNotes(arr)
+
                 router.toBack()
-                getNotes()
                 openSnackbar('Заметка создана!', <Icon28CheckCircleOutline/>)
             }
             else if (responseJSON.error) {
@@ -147,7 +157,10 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
                         placeholder='Введите значение...'
                         maxLength={100}
                         value={note}
-                        onChange={(e) => oncChange(e)}
+                        onChange={(e) => {
+                            if (e.currentTarget.value.length > 100) return
+                            oncChange(e)
+                        }}
                     />
                 </FormItem>
                 <FormItem
@@ -159,7 +172,10 @@ function BotsListModal({id, platform, router, openSnackbar, getNotes}) {
                         name='value'
                         placeholder='Введите значение...'
                         maxLength={300}
-                        onChange={(e) => oncChange(e)}
+                        onChange={(e) => {
+                            if (e.currentTarget.value.length > 300) return
+                            oncChange(e)
+                        }}
                     />
                 </FormItem>
                 <FormItem

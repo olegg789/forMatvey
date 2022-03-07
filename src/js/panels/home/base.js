@@ -1,4 +1,4 @@
-import React, {lazy, useEffect, useState} from 'react';
+import React, { useState } from 'react';
 
 import {
     Div,
@@ -12,7 +12,8 @@ import {
     Snackbar,
     Alert,
     Tabs,
-    TabsItem, HorizontalScroll,
+    TabsItem, 
+    HorizontalScroll,
 } from '@vkontakte/vkui'
 import {
     Icon28AddOutline, Icon28CheckCircleOutline,
@@ -21,29 +22,26 @@ import {
     Icon56NotePenOutline
 } from '@vkontakte/icons'
 
-const AllNotes = lazy(() => import('./allNotes'));
-const MinorNotes = lazy(() => import('./minorNotes'));
-const MiddleNotes = lazy(() => import('./middleNotes'));
-const MajorNotes = lazy(() => import('./majorNotes'));
-const CriticalNotes = lazy(() => import('./criticalNotes'))
+import AllNotes from './allNotes';
+import MinorNotes from './minorNotes';
+import MiddleNotes from './middleNotes';
+import MajorNotes from './majorNotes';
+import CriticalNotes from './criticalNotes';
 
 function HomePanelBase(
     {
         router,
         minorNotes,
-        getMinorNotes,
         allNotes,
-        getNotes,
         isDesktop,
         editNote,
         openSnackbar,
         sortNotes,
         middleNotes,
-        getMiddleNotes,
         majorNotes,
-        getMajorNotes,
         criticalNotes,
-        getCriticalNotes
+        setCriticalNotes,
+        getNotes
     }) {
 
     // eslint-disable-next-line
@@ -85,7 +83,7 @@ function HomePanelBase(
                     title: 'Да',
                     autoclose: true,
                     mode: 'destructive',
-                    action: () => {deleteNote(id); openSnackbarDel(); getNotes()}
+                    action: () => {deleteNote(id); openSnackbarDel()}
                 }]}
                 onClose={() => router.toPopout()}
                 header='Подтверждение'
@@ -105,7 +103,7 @@ function HomePanelBase(
                     title: 'Да',
                     autoclose: true,
                     mode: 'destructive',
-                    action: () => {deleteAll(); getNotes()}
+                    action: () => deleteAll()
                 }]}
                 onClose={() => router.toPopout()}
                 header='Подтверждение'
@@ -129,23 +127,19 @@ function HomePanelBase(
     async function deleteAll() {
         try {
             let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteAllNotes&access_token=${token}`)
-            // eslint-disable-next-line
-            let responseJSON = await response.json()
+            await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteAllNotes&access_token=${token}`)
             openSnackbar('Все заметки удалены!', <Icon28CheckCircleOutline/>)
+
+            getNotes({ count: 0, items: [] })
         }
         catch (err) {
             openSnackbar('Произошла ошибка :(', <Icon28ErrorCircleOutline/>)
         }
     }
 
-    useEffect(
-        () => {getNotes(); setActiveTab('all')}, []
-    )
-
     return (
         <>
-            <PullToRefresh onRefresh={() => {openSpinner(); getNotes()}}>
+            <PullToRefresh onRefresh={() => {openSpinner(); getNotes('', true)}}>
             <PanelHeader
                 left={
                     <Div>
@@ -229,19 +223,62 @@ function HomePanelBase(
                             </Group>
                         </Div>
                         {activeTab === 'all' &&
-                            <AllNotes allNotes={allNotes} router={router} getNotes={getNotes} editNote={editNote} deleteNote={(id) => deleteNote(id)}/>
+                            <AllNotes 
+                                allNotes={allNotes} 
+                                getNotes={(value, isFetch) => getNotes(value, isFetch)}
+                                router={router} 
+                                editNote={editNote} 
+                                deleteNote={(id) => deleteNote(id)}
+                            />
                         }
                         {activeTab === 'minor' &&
-                            <MinorNotes getNotes={getNotes} getMinorNotes={getMinorNotes} minorNotes={minorNotes} router={router} editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => editNote(noteId, noteName, noteValue, noteStatus, notePriority)} deleteNote={(id) => deleteNote(id)}/>
+                            <MinorNotes  
+                                allNotes={allNotes}
+                                getNotes={(value, isFetch) => getNotes(value, isFetch)}
+                                minorNotes={minorNotes} 
+                                router={router} 
+                                editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => 
+                                    editNote(noteId, noteName, noteValue, noteStatus, notePriority)
+                                } 
+                                deleteNote={(id) => deleteNote(id)}
+                            />
                         }
                         {activeTab === 'middle' &&
-                            <MiddleNotes getNotes={getNotes} getMiddleNotes={getMiddleNotes} middleNotes={middleNotes} router={router} editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => editNote(noteId, noteName, noteValue, noteStatus, notePriority)} deleteNote={(id) => deleteNote(id)}/>
+                            <MiddleNotes 
+                                allNotes={allNotes}
+                                getNotes={(value, isFetch) => getNotes(value, isFetch)}
+                                middleNotes={middleNotes} 
+                                router={router} 
+                                editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => 
+                                    editNote(noteId, noteName, noteValue, noteStatus, notePriority)
+                                } 
+                                deleteNote={(id) => deleteNote(id)}
+                            />
                         }
                         {activeTab === 'major' &&
-                            <MajorNotes getNotes={getNotes} getMajorNotes={getMajorNotes} majorNotes={majorNotes} router={router} editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => editNote(noteId, noteName, noteValue, noteStatus, notePriority)} deleteNote={(id) => deleteNote(id)}/>
+                            <MajorNotes 
+                                allNotes={allNotes}
+                                getNotes={(value, isFetch) => getNotes(value, isFetch)}
+                                majorNotes={majorNotes} 
+                                router={router} 
+                                editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => 
+                                    editNote(noteId, noteName, noteValue, noteStatus, notePriority)
+                                } 
+                                deleteNote={(id) => deleteNote(id)}
+                            />
                         }
                         {activeTab === 'critical' &&
-                            <CriticalNotes getNotes={getNotes} getCriticalNotes={getCriticalNotes} criticalNotes={criticalNotes} router={router} editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => editNote(noteId, noteName, noteValue, noteStatus, notePriority)} deleteNote={(id) => deleteNote(id)}/>
+                            <CriticalNotes 
+                                allNotes={allNotes}
+                                getNotes={(value, isFetch) => getNotes(value, isFetch)}
+                                criticalNotes={criticalNotes} 
+                                router={router} 
+                                editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => 
+                                    editNote(noteId, noteName, noteValue, noteStatus, notePriority)
+                                } 
+                                setCriticalNotes={(value) => setCriticalNotes(value)}
+                                deleteNote={(id) => deleteNote(id)}
+                            />
                         }
 
                     </>
