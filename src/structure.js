@@ -5,12 +5,17 @@ const structure = [
 		panels: [
 			{
 				id: "base",
-				hash: '/notes'
+				hash: ''
 			},
 
 			{
-				id: "placeholder",
-				hash: '/settings'
+				id: "add",
+				hash: '/add'
+			},
+
+			{
+				id: "edit",
+				hash: ''
 			}
 		]
 	},

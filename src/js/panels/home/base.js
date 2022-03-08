@@ -55,7 +55,7 @@ function HomePanelBase(
     }
 
     async function addNote() {
-        router.toModal('addNote');
+        router.toPanel('add');
     }
 
     function openSnackbarDel() {
