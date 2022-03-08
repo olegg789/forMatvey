@@ -1,20 +1,18 @@
 import React, {useState} from 'react';
 
 import {
-    ModalPage,
-    ModalPageHeader,
-    PanelHeaderButton,
     withPlatform,
-    IOS,
     FormLayout,
     FormItem,
     Textarea,
     Div,
-    Button, NativeSelect, PanelHeader, Group, PanelHeaderBack,
+    Button,
+    NativeSelect,
+    PanelHeader,
+    Group,
+    PanelHeaderBack,
 } from "@vkontakte/vkui";
 import {
-    Icon24Dismiss,
-    Icon24Cancel,
     Icon28CheckCircleOutline,
     Icon28CancelCircleOutline,
 } from '@vkontakte/icons'

@@ -15,16 +15,18 @@ import {
     usePlatform,
     VKCOM,
     withAdaptivity,
-    Snackbar,
+    Snackbar, Alert,
 } from "@vkontakte/vkui";
 
 import HomeBotsListModal from './js/components/modals/HomeBotsListModal';
 import HomeBotInfoModal from './js/components/modals/HomeBotInfoModal';
 import bridge from "@vkontakte/vk-bridge";
+import {Icon28CheckCircleOutline, Icon28ErrorCircleOutline} from "@vkontakte/icons";
 
 const HomePanelBase = lazy(() => import('./js/panels/home/base'));
 const AddNote = lazy(() => import('./js/panels/home/add'));
 const EditNote = lazy(() => import('./js/panels/home/edit'));
+const HomePanelPlaceholder = lazy(() => import('./js/panels/home/placeholder'));
 const ProfilePanelBase = lazy(() => import('./js/panels/profile/base'));
 
 let isFetchApi = false
@@ -45,6 +47,39 @@ const App = withAdaptivity(({ viewWidth, router }) => {
     const [middleNotes, setMiddleNotes] = useState({count: 0, items: []})
     const [majorNotes, setMajorNotes] = useState({count: 0, items: []})
     const [criticalNotes, setCriticalNotes] = useState({count: 0, items: []})
+
+    function openAlertAll() {
+        router.toPopout(
+            <Alert
+                actions={[{
+                    title: 'Нет',
+                    autoclose: true,
+                    mode: 'cancel',
+                }, {
+                    title: 'Да',
+                    autoclose: true,
+                    mode: 'destructive',
+                    action: () => deleteAll()
+                }]}
+                onClose={() => router.toPopout()}
+                header='Подтверждение'
+                text='Вы точно хотите удалить все замтеки? Отменить это действие невозможно.'
+            />
+        )
+    }
+
+    async function deleteAll() {
+        try {
+            let token = window.location.search.slice(1).replace(/&/gi, '/');
+            await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteAllNotes&access_token=${token}`)
+            openSnackbar('Все заметки удалены!', <Icon28CheckCircleOutline/>)
+
+            getNotes({ count: 0, items: [] })
+        }
+        catch (err) {
+            openSnackbar('Произошла ошибка :(', <Icon28ErrorCircleOutline/>)
+        }
+    }
 
     useEffect(() => {
         getAppScheme(platform); 
@@ -246,8 +281,8 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                           />
                       </Suspense>
                     </Panel>
-                      <Panel id='edit'>
-                      <Suspense fallback={<ScreenSpinner/>}>
+                    <Panel id='edit'>
+                        <Suspense fallback={<ScreenSpinner/>}>
                             <EditNote
                                 router={router}
                                 platform={platform}
@@ -262,8 +297,22 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                                 noteStatus={noteStatus}
                                 notePriority={notePriority}
                             />
-                      </Suspense>
-                      </Panel>
+                        </Suspense>
+                    </Panel>
+                    <Panel id='settings'>
+                        <Suspense fallback={<ScreenSpinner/>}>
+                            <HomePanelPlaceholder
+                                router={router}
+                                platform={platform}
+                                openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                                getNotes={() => getNotes()}
+                                deleteAll={() => deleteAll()}
+                                openAlertAll={() => openAlertAll()}
+                                snackbar={snackbar}
+                                allNotes={notes}
+                            />
+                        </Suspense>
+                    </Panel>
                   </View>
 
                   <View

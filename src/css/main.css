@@ -65,3 +65,9 @@
 .all {
     margin-left: 5px;
 }
+
+.podpis {
+    display: flex;
+    justify-content: center;
+    white-space: pre-wrap;
+}

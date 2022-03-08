@@ -16,6 +16,11 @@ const structure = [
 			{
 				id: "edit",
 				hash: ''
+			},
+
+			{
+				id: "settings",
+				hash: '/settings'
 			}
 		]
 	},

@@ -1,11 +1,8 @@
 import React, {useState} from 'react';
 
 import {
-    ModalPage,
-    ModalPageHeader,
-    PanelHeaderButton,
     withPlatform,
-    IOS, FormItem,
+    FormItem,
     Textarea,
     Div,
     Button,
@@ -15,7 +12,7 @@ import {
     Group,
     PanelHeaderBack
 } from "@vkontakte/vkui";
-import {Icon24Dismiss, Icon24Cancel, Icon28CheckCircleOutline, Icon28CancelCircleOutline} from '@vkontakte/icons'
+import {Icon28CheckCircleOutline, Icon28CancelCircleOutline} from '@vkontakte/icons'
 
 function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNotes, platform, getNotes, openSnackbar, router, noteId, noteName, noteValue, noteStatus, notePriority}) {
 

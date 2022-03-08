@@ -6,7 +6,7 @@ import {
     Div,
     Footer,
     FormItem,
-    FormLayout, 
+    FormLayout, Headline,
     Snackbar,
 } from "@vkontakte/vkui";
 import {
@@ -94,7 +94,7 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
                             <FormLayout>
                                 <FormItem
                                     top={
-                                        el.name
+                                        <Headline style={{whiteSpace: 'pre-line'}}>{el.name}</Headline>
                                     }
                                     bottom={
                                         <>

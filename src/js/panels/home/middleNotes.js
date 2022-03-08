@@ -6,7 +6,7 @@ import {
     Div,
     Footer,
     FormItem,
-    FormLayout, 
+    FormLayout, Headline,
     Snackbar
 } from "@vkontakte/vkui";
 import {
@@ -95,7 +95,7 @@ function MiddleNotes({middleNotes, router, isDesktop, editNote, openSnackbar, al
                             <FormLayout>
                                 <FormItem
                                     top={
-                                        el.name
+                                        <Headline style={{whiteSpace: 'pre-line'}}>{el.name}</Headline>
                                     }
                                     bottom={
                                         <>

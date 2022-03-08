@@ -12,14 +12,14 @@ import {
     Snackbar,
     Alert,
     Tabs,
-    TabsItem, 
+    TabsItem,
     HorizontalScroll,
+    PanelHeaderButton,
 } from '@vkontakte/vkui'
 import {
-    Icon28AddOutline, Icon28CheckCircleOutline,
+    Icon28AddOutline,
     Icon28DeleteOutline,
-    Icon28ErrorCircleOutline,
-    Icon56NotePenOutline
+    Icon28SettingsOutline,
 } from '@vkontakte/icons'
 
 import AllNotes from './allNotes';
@@ -92,26 +92,6 @@ function HomePanelBase(
         )
     }
 
-    function openAlertAll() {
-        router.toPopout(
-            <Alert
-                actions={[{
-                    title: 'Нет',
-                    autoclose: true,
-                    mode: 'cancel',
-                }, {
-                    title: 'Да',
-                    autoclose: true,
-                    mode: 'destructive',
-                    action: () => deleteAll()
-                }]}
-                onClose={() => router.toPopout()}
-                header='Подтверждение'
-                text='Вы точно хотите удалить все замтеки? Отменить это действие невозможно.'
-            />
-        )
-    }
-
     async function deleteNote(id) {
         try {
             let token = window.location.search.slice(1).replace(/&/gi, '/');
@@ -124,27 +104,16 @@ function HomePanelBase(
         }
     }
 
-    async function deleteAll() {
-        try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteAllNotes&access_token=${token}`)
-            openSnackbar('Все заметки удалены!', <Icon28CheckCircleOutline/>)
-
-            getNotes({ count: 0, items: [] })
-        }
-        catch (err) {
-            openSnackbar('Произошла ошибка :(', <Icon28ErrorCircleOutline/>)
-        }
-    }
-
     return (
         <>
             <PullToRefresh onRefresh={() => {openSpinner(); getNotes('', true)}}>
             <PanelHeader
                 left={
-                    <Div>
-                        <Icon56NotePenOutline width={32} height={32} fill='#EC49E7'/>
-                    </Div>
+                    <PanelHeaderButton
+                        onClick={() => router.toPanel('settings')}
+                    >
+                        <Icon28SettingsOutline fill='#EC49E7'/>
+                    </PanelHeaderButton>
                 }
                 separator={false}
             >
@@ -167,15 +136,6 @@ function HomePanelBase(
                 header={
                     <Header
                         mode='secondary'
-                        aside={allNotes.count !== 0 &&
-                            <Button
-                                mode='outline'
-                                appearance='negative'
-                                onClick={() => openAlertAll()}
-                        >
-                                Удалить все
-                            </Button>
-                        }
                     >
                         Мои заметки
                     </Header>
