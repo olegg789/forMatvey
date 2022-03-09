@@ -40,7 +40,7 @@ function HomePanelPlaceholder({isDesktop, router, openSnackbar, getNotes, openAl
     return(
         <>
             <PanelHeader 
-                separator={false}
+                separator
                 left={<PanelHeaderBack onClick={() => router.toBack()}/>}
             >
                 Настройки

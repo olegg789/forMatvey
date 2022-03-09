@@ -115,7 +115,7 @@ function HomePanelBase(
                         <Icon28SettingsOutline fill='#EC49E7'/>
                     </PanelHeaderButton>
                 }
-                separator={false}
+                separator
             >
                 Заметки
             </PanelHeader>

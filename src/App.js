@@ -221,8 +221,8 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                     <SplitCol
                         animate={!isDesktop}
                         spaced={isDesktop}
-                        width={isDesktop ? '560px' : '100%'}
-                        maxWidth={isDesktop ? '560px' : '100%'}
+                        width={isDesktop ? '700px' : '100%'}
+                        maxWidth={isDesktop ? '700px' : '100%'}
                     >
                     <Epic
                         activeStory={router.activeView}

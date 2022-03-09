@@ -97,6 +97,10 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
                     router.toBack()
                     openSnackbar('Произошла ошибка, некорректный айди заметки. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
+                else if (responseJSON.code === '7') {
+                    router.toBack()
+                    openSnackbar('Кто-то флудит, ай-яй!', <Icon28CancelCircleOutline/>)
+                }
             }
         }
         catch (err) {
@@ -107,7 +111,7 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
     return (
         <>
             <PanelHeader
-                separator={false}
+                separator
                 left={<PanelHeaderBack onClick={() => router.toBack()}/>}
             >
                 Редактирование
