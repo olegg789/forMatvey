@@ -13,6 +13,7 @@ import {
     Icon28DeleteOutline,
     Icon28EditOutline
 } from "@vkontakte/icons";
+import declOfNum from '../../functions/delcOfNum';
 
 function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes}) {
     const [snackbarDel, setSnackbarDel] = useState(null)
@@ -125,7 +126,7 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
                     </Div>
                 )
             })}
-            <Footer>Всего заметок {allNotes.count}</Footer>
+            <Footer>Всего {allNotes.count} {declOfNum(allNotes.count, ['заметка', 'заметки', 'заметок'])}</Footer>
             {snackbarDel}
         </>
     )
