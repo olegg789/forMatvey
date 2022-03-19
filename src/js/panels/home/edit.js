@@ -61,44 +61,54 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
         }
     }
 
-    async function editNOTE() {
+    async function edit() {
         try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.editNote&access_token=${token}&name=${note.replace(/&/gi, '¦')}&value=${value.replace(/&/gi, '¦')}&status=${status}&priority=${priority}&noteId=${noteId}`)
-            // eslint-disable-next-line
+            let token = window.location.search.slice(1)
+            let params = {
+                method: 'notes.editNote',
+                access_token: token,
+                name: note,
+                value: value,
+                priority: Number(priority),
+                status: Number(status),
+                noteId: Number(noteId)
+
+            };
+
+            let response = await fetch(
+                'https://sab.wan-group.ru/notes',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(params)
+                }
+            )
             let responseJSON = await response.json()
+
             if (response.ok) {
                 router.toBack()
                 getNotes()
-                getMinorNotes()
-                getMiddleNotes()
-                getMajorNotes()
-                getCriticalNotes()
                 openSnackbar('Заметка отредактирована!', <Icon28CheckCircleOutline/>)
             }
             else if (responseJSON.error) {
                 if (responseJSON.code === '12') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, вы ввели некорректное имя. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '10') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, вы ввели некорректный статус. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '11') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, вы ввели некорректный приоритет. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '13') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, вы ввели некорректное значение заметки. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '14') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, некорректный айди заметки. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '7') {
-                    router.toBack()
                     openSnackbar('Кто-то флудит, ай-яй!', <Icon28CancelCircleOutline/>)
                 }
             }
@@ -180,7 +190,7 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
                         <Button
                             size='l'
                             stretched
-                            onClick={() => editNOTE()}
+                            onClick={() => edit()}
                         >
                             Сохранить
                         </Button>

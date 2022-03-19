@@ -54,8 +54,22 @@ function MiddleNotes({middleNotes, router, isDesktop, editNote, openSnackbar, al
 
     async function deleteNote(id) {
         try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
+            let token = window.location.search.slice(1)
+            let params = {
+                access_token: token,
+                method: 'notes.deleteNote',
+                noteId: Number(id),
+            }
+            await fetch(
+                'https://sab.wan-group.ru/notes',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(params)
+                }
+            )
 
             allNotes.items.forEach((el, index) => {
                 if (el.noteId === id) {
@@ -77,7 +91,7 @@ function MiddleNotes({middleNotes, router, isDesktop, editNote, openSnackbar, al
     function openSnackbarDel() {
         setSnackbarDel(
             <Snackbar
-                className={!isDesktop && 'snack'}
+                className='snack'
                 layout='vertical'
                 onClose={() => setSnackbarDel(null)}
                 before={<Icon28DeleteOutline/>}
@@ -111,7 +125,7 @@ function MiddleNotes({middleNotes, router, isDesktop, editNote, openSnackbar, al
                                     <Button
                                         className='btnNote'
                                         mode='outline'
-                                        onClick={() => {editNote(el.noteId, el.name, el.value, el.status, el.priority); getNotes()}}
+                                        onClick={() => editNote(el.noteId, el.name, el.value, el.status, el.priority)}
                                         sizeY='regular'
                                     >
                                         <Icon28EditOutline/>
@@ -131,7 +145,7 @@ function MiddleNotes({middleNotes, router, isDesktop, editNote, openSnackbar, al
                     </Div>
                 )
             })}
-            <Footer>Всего {allNotes.count} {declOfNum(allNotes.count, ['заметка', 'заметки', 'заметок'])}</Footer>
+            <Footer>Всего {middleNotes.count} {declOfNum(middleNotes.count, ['заметка', 'заметки', 'заметок'])}</Footer>
             {snackbarDel}
         </>
     )

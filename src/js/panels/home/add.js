@@ -62,14 +62,32 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
         }
     }
 
-    async function addNote() {
+    async function add() {
         try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.createNote&access_token=${token}&name=${note.replace(/&/gi, '¦')}&value=${value.replace(/&/gi, '¦')}&status=${status}&priority=${priority}`)
-            //console.log(response)
-            // eslint-disable-next-line
-            let responseJSON = await response.json()
+            let token = window.location.search.slice(1)
+            let params = {
+                method: 'notes.createNote',
+                access_token: token,
+                name: note,
+                value: value,
+                priority: Number(priority),
+                status: Number(status)
 
+            };
+
+            let response = await fetch(
+                'https://sab.wan-group.ru/notes',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(params)
+                }
+            )
+            let responseJSON = await response.json()
+            console.log(response)
+            console.log(token)
             if (response.ok) {
                 let arr = notes
                 arr.count += 1
@@ -78,7 +96,7 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
                     name: note,
                     priority: Number(priority),
                     status: Number(status),
-                    value: value.replace(/&/gi, '¦'),
+                    value: value,
                 })
                 getNotes(arr)
 
@@ -87,33 +105,26 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
             }
             else if (responseJSON.error) {
                 if (responseJSON.code === '12') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, вы ввели некорректное имя. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '10') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, вы ввели некорректный статус. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '11') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, вы ввели некорректный приоритет. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '13') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, вы ввели некорректное значение заметки. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '14') {
-                    router.toBack()
                     openSnackbar('Произошла ошибка, некорректный айди заметки. Попробуйте снова!', <Icon28CancelCircleOutline/>)
                 }
                 else if (responseJSON.code === '7') {
-                    router.toBack()
                     openSnackbar('Кто-то флудит, ай-яй!', <Icon28CancelCircleOutline/>)
                 }
             }
-
         }
-        catch(err) {
+        catch (err) {
             console.log(err)
         }
     }
@@ -194,7 +205,7 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
                     <Button
                         size='l'
                         stretched
-                        onClick={() => addNote()}
+                        onClick={() => add()}
                     >
                         Создать
                     </Button>

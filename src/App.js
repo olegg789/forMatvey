@@ -63,15 +63,28 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                 }]}
                 onClose={() => router.toPopout()}
                 header='Подтверждение'
-                text='Вы точно хотите удалить все замтеки? Отменить это действие невозможно.'
+                text='Вы точно хотите удалить все заметки? Отменить это действие невозможно.'
             />
         )
     }
 
     async function deleteAll() {
         try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteAllNotes&access_token=${token}`)
+            let token = window.location.search.slice(1);
+            let params = {
+                access_token: token,
+                method: 'notes.deleteAllNotes'
+            }
+            await fetch(
+                `https://sab.wan-group.ru/notes`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(params)
+                }
+                )
             openSnackbar('Все заметки удалены!', <Icon28CheckCircleOutline/>)
 
             getNotes({ count: 0, items: [] })
@@ -90,8 +103,21 @@ const App = withAdaptivity(({ viewWidth, router }) => {
     async function getNotes(value, isFetch) {
         if (!isFetchApi || isFetch) {
             try {
-                let token = window.location.search.slice(1).replace(/&/gi, '/');
-                let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.getMyNotes&access_token=${token}`)
+                let token = window.location.search.slice(1);
+                let params = {
+                    access_token: token,
+                    method: 'notes.getMyNotes'
+                }
+                let response = await fetch(
+                    `https://sab.wan-group.ru/notes`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8'
+                        },
+                        body: JSON.stringify(params)
+                    }
+                )
                 let responseJSON = await response.json()
                 responseJSON.items.reverse()
                 await setNotes(responseJSON)
@@ -152,7 +178,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
     async function openSnackbar(text, icon) {
         setSnackbar(
             <Snackbar
-                className={!isDesktop && 'snack'}
+                className='snack'
                 layout='vertical'
                 onClose={() => setSnackbar(null)}
                 before={icon}
@@ -280,6 +306,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                               setCriticalNotes={(value) => setCriticalNotes(value)}
                           />
                       </Suspense>
+                        {snackbar}
                     </Panel>
                     <Panel id='edit'>
                         <Suspense fallback={<ScreenSpinner/>}>
@@ -296,8 +323,10 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                                 noteValue={noteValue}
                                 noteStatus={noteStatus}
                                 notePriority={notePriority}
+                                openSnackbar={(text, icon) => openSnackbar(text, icon)}
                             />
                         </Suspense>
+                        {snackbar}
                     </Panel>
                     <Panel id='settings'>
                         <Suspense fallback={<ScreenSpinner/>}>

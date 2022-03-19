@@ -54,8 +54,22 @@ function CriticalNotes({criticalNotes, router, isDesktop, editNote, openSnackbar
 
     async function deleteNote(id) {
         try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
+            let token = window.location.search.slice(1)
+            let params = {
+                access_token: token,
+                method: 'notes.deleteNote',
+                noteId: Number(id),
+            }
+            await fetch(
+                'https://sab.wan-group.ru/notes',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(params)
+                }
+            )
 
             allNotes.items.forEach((el, index) => {
                 if (el.noteId === id) {
@@ -76,7 +90,7 @@ function CriticalNotes({criticalNotes, router, isDesktop, editNote, openSnackbar
     function openSnackbarDel() {
         setSnackbarDel(
             <Snackbar
-                className={!isDesktop && 'snack'}
+                className='snack'
                 layout='vertical'
                 onClose={() => setSnackbarDel(null)}
                 before={<Icon28DeleteOutline/>}
@@ -130,7 +144,7 @@ function CriticalNotes({criticalNotes, router, isDesktop, editNote, openSnackbar
                     </Div>
                 )
             })}
-            <Footer>Всего {allNotes.count} {declOfNum(allNotes.count, ['заметка', 'заметки', 'заметок'])}</Footer>
+            <Footer>Всего {criticalNotes.count} {declOfNum(criticalNotes.count, ['заметка', 'заметки', 'заметок'])}</Footer>
 
             {snackbarDel}
         </>

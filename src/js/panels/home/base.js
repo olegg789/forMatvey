@@ -94,10 +94,26 @@ function HomePanelBase(
 
     async function deleteNote(id) {
         try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            let response = await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
+            let token = window.location.search.slice(1)
+            let params = {
+                access_token: token,
+                method: 'notes.deleteNote',
+                noteId: Number(id),
+            }
+            let response = await fetch(
+                'https://sab.wan-group.ru/notes',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(params)
+                }
+            )
             // eslint-disable-next-line
             let responseJSON = await response.json()
+            console.log(response)
+            getNotes()
         }
         catch (err) {
             console.log(err)
@@ -187,7 +203,7 @@ function HomePanelBase(
                                 allNotes={allNotes} 
                                 getNotes={(value, isFetch) => getNotes(value, isFetch)}
                                 router={router} 
-                                editNote={editNote} 
+                                editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
                             />
                         }
@@ -197,9 +213,7 @@ function HomePanelBase(
                                 getNotes={(value, isFetch) => getNotes(value, isFetch)}
                                 minorNotes={minorNotes} 
                                 router={router} 
-                                editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => 
-                                    editNote(noteId, noteName, noteValue, noteStatus, notePriority)
-                                } 
+                                editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
                             />
                         }
@@ -208,10 +222,8 @@ function HomePanelBase(
                                 allNotes={allNotes}
                                 getNotes={(value, isFetch) => getNotes(value, isFetch)}
                                 middleNotes={middleNotes} 
-                                router={router} 
-                                editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => 
-                                    editNote(noteId, noteName, noteValue, noteStatus, notePriority)
-                                } 
+                                router={router}
+                                editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
                             />
                         }
@@ -220,10 +232,8 @@ function HomePanelBase(
                                 allNotes={allNotes}
                                 getNotes={(value, isFetch) => getNotes(value, isFetch)}
                                 majorNotes={majorNotes} 
-                                router={router} 
-                                editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => 
-                                    editNote(noteId, noteName, noteValue, noteStatus, notePriority)
-                                } 
+                                router={router}
+                                editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
                             />
                         }
@@ -232,10 +242,8 @@ function HomePanelBase(
                                 allNotes={allNotes}
                                 getNotes={(value, isFetch) => getNotes(value, isFetch)}
                                 criticalNotes={criticalNotes} 
-                                router={router} 
-                                editNote={(noteId, noteName, noteValue, noteStatus, notePriority) => 
-                                    editNote(noteId, noteName, noteValue, noteStatus, notePriority)
-                                } 
+                                router={router}
+                                editNote={editNote}
                                 setCriticalNotes={(value) => setCriticalNotes(value)}
                                 deleteNote={(id) => deleteNote(id)}
                             />

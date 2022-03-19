@@ -54,9 +54,22 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
 
     async function deleteNote(id, index) {
         try {
-            let token = window.location.search.slice(1).replace(/&/gi, '/');
-            await fetch(`https://sab.wan-group.ru/notes?method=notes.deleteNote&noteId=${id}&access_token=${token}`)
-
+            let token = window.location.search.slice(1)
+            let params = {
+                access_token: token,
+                method: 'notes.deleteNote',
+                noteId: Number(id),
+            }
+            await fetch(
+                'https://sab.wan-group.ru/notes',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(params)
+                }
+            )
             let arr = allNotes
             arr.items.splice(index, 1);
             arr.count -= 1
@@ -72,7 +85,7 @@ function AllNotes({router, allNotes, isDesktop, editNote, openSnackbar, getNotes
     function openSnackbarDel() {
         setSnackbarDel(
             <Snackbar
-                className={!isDesktop && 'snack'}
+                classNaту='snack'
                 layout='vertical'
                 onClose={() => setSnackbarDel(null)}
                 before={<Icon28DeleteOutline/>}
