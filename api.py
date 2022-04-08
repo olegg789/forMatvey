@@ -59,7 +59,7 @@ class notes(Resource):
                 status = is_valid(query=query_params, secret=client_secret)
                 if status:
                     if request.get_json().get('method') == 'notes.getMyNotes':
-                        resultData = actionDB.getData(query_params['vk_user_id'], True, None)
+                        resultData = actionDB.getData(query_params['vk_user_id'])
                         return {"count": resultData[0], "items": resultData[1]}, 200
 
                     if request.get_json().get('method') == 'notes.createNote' or request.get_json().get('method') == 'notes.editNote':
