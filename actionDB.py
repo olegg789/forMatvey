@@ -1,12 +1,12 @@
 import sqlite3 as sql
 import json
-import time
+import datetime
 
 con = sql.connect('data/allUsers.db', check_same_thread = False)
 
 def createNote(user_id, name, value, priority, status):
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` STRING, `time` STRING, `timeEdit` STRING, `value` STRING, `priority` INT, `status` INT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` TEXT, `time` STRING, `timeEdit` STRING, `value` TEXT, `priority` INT, `status` INT)")
     cur.execute('SELECT noteId FROM `allUsers`')
     result = cur.fetchall()
     if len(result) == 0:
@@ -20,7 +20,7 @@ def createNote(user_id, name, value, priority, status):
 
 def getData(user_id):
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` STRING, `time` STRING, `timeEdit` STRING, `value` STRING, `priority` INT, `status` INT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` TEXT, `time` STRING, `timeEdit` STRING, `value` TEXT, `priority` INT, `status` INT)")
     cur.execute('SELECT * FROM `allUsers` WHERE id = ?', (user_id,))
     rows = cur.fetchall()
     items = []
@@ -46,7 +46,7 @@ def getData(user_id):
 
 def deleteNote(user_id, noteId, operation):
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` STRING, `time` STRING, `timeEdit` STRING, `value` STRING, `priority` INT, `status` INT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` TEXT, `time` STRING, `timeEdit` STRING, `value` TEXT, `priority` INT, `status` INT)")
     if operation:
         cur.execute('DELETE from `allUsers` where id = ?', (user_id,))
         con.commit(); cur.close()
@@ -65,7 +65,7 @@ def deleteNote(user_id, noteId, operation):
 
 def editNote(user_id, noteId, name, value, priority, status):
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` STRING, `time` STRING, `timeEdit` STRING, `value` STRING, `priority` INT, `status` INT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS `allUsers` (`id` INT, `noteId` INT, `name` TEXT, `time` STRING, `timeEdit` STRING, `value` TEXT, `priority` INT, `status` INT)")
     cur.execute('SELECT id FROM `allUsers` WHERE noteId = ?', (noteId,))
     result = cur.fetchall()
     if len(result) == 0:
@@ -77,3 +77,4 @@ def editNote(user_id, noteId, name, value, priority, status):
         return {"message": 'ok'}, 200
     else:
         return {"error": True, "message": 'One of the parameters is invalid'}, 400
+
