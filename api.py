@@ -46,7 +46,7 @@ timeUsers = dict()
 class notes(Resource):
 
         def post(self):
-                if len(request.get_json()) == 0:
+                if len(str(request.get_json())) == 0:
                         return {"error": True, "code": 5, "messsage": 'Incorrectly passed parameters'}, 400
                 if request.get_json().get('method') == None or request.get_json().get('access_token') == None:
                     return {"error": True, "code": 5, "messsage": 'Incorrectly passed parameters'}, 400
@@ -70,13 +70,13 @@ class notes(Resource):
                                 for param in range(4):
                                         if request.get_json().get(params[param]) == None or not str(request.get_json().get(params[param])).strip():
                                                 return {"error": True, "code": f'1{param}', "messsage": 'One of the parameters is invalid'}, 400
-                                        if len(request.get_json().get(params[param])) > 300:
+                                        if len(str(request.get_json().get(params[param]))) > 300:
                                                 return {"error": True, "code": f'1{param}', "messsage": 'One of the parameters is invalid'}, 400
                                 for param in range(2):
                                         result = re.match('^[0-9]+$', str(request.get_json().get(params[param])))
                                         if result == None:
                                                 return {"error": True, "code": f'1{param}', "messsage": 'One of the parameters is invalid'}, 400
-                                        if request.get_json().get(params[param]) < 0 or request.get_json().get(params[param]) > 3:
+                                        if int(request.get_json().get(params[param])) < 0 or int(request.get_json().get(params[param])) > 3:
                                                 return {"error": True, "code": f'1{param}', "messsage": 'One of the parameters is invalid'}, 400
                                 if request.get_json().get('method') == 'notes.createNote':
                                         if (time.time() - timeUsers[query_params['vk_user_id']]) > 0:
