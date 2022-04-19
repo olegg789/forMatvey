@@ -71,3 +71,11 @@
     justify-content: center;
     white-space: pre-wrap;
 }
+
+.plch_wht {
+    color: black;
+}
+
+.plch_blck {
+    color: white;
+}

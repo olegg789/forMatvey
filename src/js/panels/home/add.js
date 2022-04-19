@@ -7,10 +7,9 @@ import {
     Textarea,
     Div,
     Button,
-    NativeSelect,
     PanelHeader,
     Group,
-    PanelHeaderBack,
+    PanelHeaderBack, CustomSelect, CustomSelectOption,
 } from "@vkontakte/vkui";
 import {
     Icon28CheckCircleOutline,
@@ -86,8 +85,6 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
                 }
             )
             let responseJSON = await response.json()
-            console.log(response)
-            console.log(token)
             if (response.ok) {
                 let arr = notes
                 arr.count += 1
@@ -173,33 +170,38 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
                 <FormItem
                     top='Введите статус заметки'
                 >
-                    <NativeSelect
+                    <CustomSelect
                         name='status'
                         placeholder='Не выбран'
                         onChange={(e) => oncChange(e)}
-                    >
-                        {statuses.map((el) => {
-                            return(
-                                <option value={el.value}>{el.status}</option>
-                            )
-
-                        })}
-                    </NativeSelect>
+                        options={statuses.map((el) => ({
+                            label: el.status,
+                            value: el.value,
+                        }))}
+                        renderOption={({ option, ...restProps }) => (
+                            <CustomSelectOption
+                                {...restProps}
+                            />
+                        )}
+                    />
                 </FormItem>
                 <FormItem
                     top='Введите приоритет заметки'
                 >
-                    <NativeSelect
+                    <CustomSelect
                         name='priority'
                         placeholder='Не выбран'
                         onChange={(e) => oncChange(e)}
-                    >
-                        {priorities.map((el) => {
-                            return(
-                                <option value={el.value}>{el.priority}</option>
-                            )
-                        })}
-                    </NativeSelect>
+                        options={priorities.map((el) => ({
+                            label: el.priority,
+                            value: el.value,
+                        }))}
+                        renderOption={({ option, ...restProps }) => (
+                            <CustomSelectOption
+                                {...restProps}
+                            />
+                        )}
+                    />
                 </FormItem>
                 <Div>
                     <Button

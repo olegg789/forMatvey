@@ -10,10 +10,12 @@ import {
     Snackbar
 } from "@vkontakte/vkui";
 import {
+    Icon28CheckCircleOutline, Icon28CopyOutline,
     Icon28DeleteOutline,
     Icon28EditOutline
 } from "@vkontakte/icons";
 import declOfNum from '../../functions/delcOfNum';
+import bridge from "@vkontakte/vk-bridge";
 
 function CriticalNotes({criticalNotes, router, isDesktop, editNote, openSnackbar, allNotes, getNotes}) {
     const [snackbarDel, setSnackbarDel] = useState(null)
@@ -102,19 +104,22 @@ function CriticalNotes({criticalNotes, router, isDesktop, editNote, openSnackbar
 
     return (
         <>
-            {criticalNotes.items.map((el) => {
+            {criticalNotes.items.map((el, index) => {
                 return (
                     <Div>
                         <Card mode='outline'>
                             <FormLayout>
                                 <FormItem
+                                    style={{whiteSpace: 'pre-line'}}
                                     top={
                                         <Headline style={{whiteSpace: 'pre-line'}}>{el.name}</Headline>
                                     }
                                     bottom={
                                         <>
-                                            Статус: {statuses[el.status]},
-                                            приоритет: <span className={el.priority === 3 && 'critical'}>{priorites[el.priority]}</span>
+                                            Статус: {statuses[el.status]}, <br/>
+                                            Приоритет: <span className={el.priority === 3 && 'critical'}>{priorites[el.priority]}</span> <br/>
+                                            Создано: {el.time} <br/>
+                                            Отредактировано: {el.timeEdit}
                                         </>
                                     }
                                 >
@@ -132,9 +137,23 @@ function CriticalNotes({criticalNotes, router, isDesktop, editNote, openSnackbar
                                     <Button
                                         className='btnNote'
                                         mode='outline'
+                                        onClick={() => {
+                                            bridge.send(
+                                                "VKWebAppCopyText",
+                                                {
+                                                    text: `${el.name}\n\n${el.value}\n\nСтатус: ${statuses[el.status]}\n\nПриоритет: ${priorites[el.priority]}`});
+                                            openSnackbar('Заметка скопирована!', <Icon28CheckCircleOutline/>)
+                                        }}
+                                        sizeY='regular'
+                                    >
+                                        <Icon28CopyOutline/>
+                                    </Button>
+                                    <Button
+                                        className='btnNote'
+                                        mode='outline'
                                         appearance='negative'
                                         sizeY='regular'
-                                        onClick={() => openAlert(el.noteId)}
+                                        onClick={() => openAlert(el.noteId, index)}
                                     >
                                         <Icon28DeleteOutline/>
                                     </Button>

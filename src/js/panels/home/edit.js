@@ -7,14 +7,13 @@ import {
     Div,
     Button,
     FormLayout,
-    NativeSelect,
     PanelHeader,
     Group,
-    PanelHeaderBack
+    PanelHeaderBack, CustomSelect, CustomSelectOption
 } from "@vkontakte/vkui";
 import {Icon28CheckCircleOutline, Icon28CancelCircleOutline} from '@vkontakte/icons'
 
-function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNotes, platform, getNotes, openSnackbar, router, noteId, noteName, noteValue, noteStatus, notePriority}) {
+function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNotes, platform, getNotes, openSnackbar, router, noteId, noteName, noteValue, noteStatus, notePriority, scheme}) {
 
     const [note, setNote] = useState(noteName)
     const [value, setValue] = useState(noteValue)
@@ -156,35 +155,38 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
                     <FormItem
                         top='Введите статус заметки'
                     >
-                        <NativeSelect
+                        <CustomSelect
                             name='status'
-                            placeholder='Не выбран'
-                            value={status}
+                            placeholder={<span className={scheme === 'space_gray' ? 'plch_blck' : 'plch_wht'}>{statuses[status].status}</span>}
                             onChange={(e) => oncChange(e)}
-                        >
-                            {statuses.map((el) => {
-                                return(
-                                    <option value={el.value}>{el.status}</option>
-                                )
-
-                            })}
-                        </NativeSelect>
+                            options={statuses.map((el) => ({
+                                label: el.status,
+                                value: el.value,
+                            }))}
+                            renderOption={({ option, ...restProps }) => (
+                                <CustomSelectOption
+                                    {...restProps}
+                                />
+                            )}
+                        />
                     </FormItem>
                     <FormItem
                         top='Введите приоритет заметки'
                     >
-                        <NativeSelect
+                        <CustomSelect
                             name='priority'
-                            placeholder='Не выбран'
-                            value={priority}
+                            placeholder={<span className={scheme === 'space_gray' ? 'plch_blck' : 'plch_wht'}>{priorities[priority].priority}</span>}
                             onChange={(e) => oncChange(e)}
-                        >
-                            {priorities.map((el) => {
-                                return(
-                                    <option value={el.value}>{el.priority}</option>
-                                )
-                            })}
-                        </NativeSelect>
+                            options={priorities.map((el) => ({
+                                label: el.priority,
+                                value: el.value,
+                            }))}
+                            renderOption={({ option, ...restProps }) => (
+                                <CustomSelectOption
+                                    {...restProps}
+                                />
+                            )}
+                        />
                     </FormItem>
                     <Div>
                         <Button

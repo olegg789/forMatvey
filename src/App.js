@@ -135,7 +135,6 @@ const App = withAdaptivity(({ viewWidth, router }) => {
 
     async function getMinorNotes(value) {
         const result = value.items.filter(note => note.priority === 0);
-        console.log(value)
         setMinorNotes({ count: result.length, items: result })
 
         getMiddleNotes(value);
@@ -324,6 +323,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                                 noteStatus={noteStatus}
                                 notePriority={notePriority}
                                 openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                                scheme={scheme}
                             />
                         </Suspense>
                         {snackbar}

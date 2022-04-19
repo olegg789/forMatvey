@@ -205,6 +205,7 @@ function HomePanelBase(
                                 router={router} 
                                 editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
+                                openSnackbar={(text, icon) => openSnackbar(text, icon)}
                             />
                         }
                         {activeTab === 'minor' &&
@@ -215,6 +216,7 @@ function HomePanelBase(
                                 router={router} 
                                 editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
+                                openSnackbar={(text, icon) => openSnackbar(text, icon)}
                             />
                         }
                         {activeTab === 'middle' &&
@@ -225,6 +227,7 @@ function HomePanelBase(
                                 router={router}
                                 editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
+                                openSnackbar={(text, icon) => openSnackbar(text, icon)}
                             />
                         }
                         {activeTab === 'major' &&
@@ -235,6 +238,7 @@ function HomePanelBase(
                                 router={router}
                                 editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
+                                openSnackbar={(text, icon) => openSnackbar(text, icon)}
                             />
                         }
                         {activeTab === 'critical' &&
@@ -246,6 +250,7 @@ function HomePanelBase(
                                 editNote={editNote}
                                 setCriticalNotes={(value) => setCriticalNotes(value)}
                                 deleteNote={(id) => deleteNote(id)}
+                                openSnackbar={(text, icon) => openSnackbar(text, icon)}
                             />
                         }
 
