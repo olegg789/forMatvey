@@ -16,7 +16,17 @@ def createNote(user_id, name, value, priority, status):
     cur.execute('''insert into allUsers (id,noteId,name,time,timeEdit,value,priority,status)values
                 (:id,:noteId,:name,:time,:timeEdit,:value,:priority,:status)''',{'id':user_id,'noteId':result,'name':name,'time':datetime.datetime.now().strftime('%H:%M %d.%m.%Y'),'timeEdit':datetime.datetime.now().strftime('%H:%M %d.%m.%Y'),'value':value,'priority':priority,'status':status})
     con.commit(); cur.close()
-    return 'ok'
+    return {
+             "id": user_id,
+             "noteId": result,
+             "name": name,
+             "time": datetime.datetime.now().strftime('%H:%M %d.%m.%Y'),
+             "timeEdit": datetime.datetime.now().strftime('%H:%M %d.%m.%Y'),
+             "value": value,
+             "priority": priority,
+             "status": status
+           }
+
 
 def getData(user_id):
     cur = con.cursor()
@@ -74,7 +84,6 @@ def editNote(user_id, noteId, name, value, priority, status):
         cur.execute(
                     'UPDATE allUsers SET name = ?, value = ?, priority = ?, status = ?, timeEdit = ? WHERE noteId = ?', (name, value, priority, status, datetime.datetime.now().strftime('%H:%M %d.%m.%Y'), noteId))
         con.commit(); cur.close()
-        return {"message": 'ok'}, 200
+        return {"time": datetime.datetime.now().strftime('%H:%M %d.%m.%Y')}, 200
     else:
         return {"error": True, "message": 'One of the parameters is invalid'}, 400
-
