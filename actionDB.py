@@ -65,13 +65,13 @@ def deleteNote(user_id, noteId, operation):
         cur.execute('SELECT id FROM `allUsers` WHERE noteId = ?', (noteId,))
         result = cur.fetchall()
         if len(result) == 0:
-                    return {"error": True, "message": 'Incorreclyt passed noteId'}, 400
+                    return {"error": True, "code": 50, "message": 'Incorrectly passed noteId'}, 400
         if result[-1][-1] == user_id:
                     cur.execute('DELETE from `allUsers` where noteId = ?', (noteId,))
                     con.commit(); cur.close()
                     return {"message": 'ok'}, 200
         else:
-                    return {"error": True, "message": 'One of the parameters is invalid'}, 400
+                    return {"error": True, "message": "Attempting to change someone else's note"}, 400
 
 def editNote(user_id, noteId, name, value, priority, status):
     cur = con.cursor()
@@ -79,11 +79,11 @@ def editNote(user_id, noteId, name, value, priority, status):
     cur.execute('SELECT id FROM `allUsers` WHERE noteId = ?', (noteId,))
     result = cur.fetchall()
     if len(result) == 0:
-        return {"error": True, "message": 'Incorrectly passed noteId'}, 400
+        return {"error": True, "code": 50, "message": 'Incorrectly passed noteId'}, 400
     if result[-1][-1] == user_id:
         cur.execute(
                     'UPDATE allUsers SET name = ?, value = ?, priority = ?, status = ?, timeEdit = ? WHERE noteId = ?', (name, value, priority, status, datetime.datetime.now().strftime('%H:%M %d.%m.%Y'), noteId))
         con.commit(); cur.close()
         return {"time": datetime.datetime.now().strftime('%H:%M %d.%m.%Y')}, 200
     else:
-        return {"error": True, "message": 'One of the parameters is invalid'}, 400
+        return {"error": True, "message": "Attempting to change someone else's note"}, 400
