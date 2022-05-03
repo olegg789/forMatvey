@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
     withPlatform,
@@ -9,14 +9,14 @@ import {
     Button,
     PanelHeader,
     Group,
-    PanelHeaderBack, CustomSelect, CustomSelectOption,
+    PanelHeaderBack, CustomSelect, CustomSelectOption, ScreenSpinner, Alert,
 } from "@vkontakte/vkui";
 import {
     Icon28CheckCircleOutline,
     Icon28CancelCircleOutline,
 } from '@vkontakte/icons'
 
-function AddNote({platform, router, openSnackbar, notes, getNotes}) {
+function AddNote({platform, router, openSnackbar, notes, getNotes, setSnackbar}) {
     const [note, setNote] = useState('')
     const [value, setValue] = useState('')
     const [status, setStatus] = useState('')
@@ -38,6 +38,8 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
         {value: '3', priority: 'Критический'}
     ]
 
+    useEffect(() => {setSnackbar(null)}, [])
+
     async function oncChange(e) {
 
         const {name, value} = e.currentTarget;
@@ -50,6 +52,7 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
         else if (name === 'value') {
             setValue(value)
             setCountValue(`${value.length}/300`)
+            console.log(value)
         }
 
         else if (name === 'status') {
@@ -61,8 +64,31 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
         }
     }
 
+    function openAlert() {
+        router.toPopout(
+            <Alert
+                actions={[{
+                    title: 'Нет',
+                    autoclose: true,
+                    mode: 'cancel',
+                }, {
+                    title: 'Да',
+                    autoclose: true,
+                    mode: 'destructive',
+                    action: () => {router.toBack(); router.toBack()}
+                }]}
+                onClose={() => router.toPopout()}
+                header='Подтверждение'
+                text='Вы точно хотите выйти? Введённые значения не сохранятся.'
+            />
+        )
+    }
+
+    //window.addEventListener("popstate", () => { openAlert() }, false);
+
     async function add() {
         try {
+            router.toPopout(<ScreenSpinner/>)
             let token = window.location.search.slice(1)
             let params = {
                 method: 'notes.createNote',
@@ -85,6 +111,7 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
                 }
             )
             let responseJSON = await response.json()
+            router.toBack()
             if (response.ok) {
                 let arr = notes
                 arr.count += 1
@@ -94,11 +121,16 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
                     priority: Number(priority),
                     status: Number(status),
                     value: value,
+                    time: responseJSON.time,
+                    timeEdit: responseJSON.timeEdit
                 })
                 getNotes(arr)
 
+                console.log(responseJSON.value)
+
                 router.toBack()
                 openSnackbar('Заметка создана!', <Icon28CheckCircleOutline/>)
+
             }
             else if (responseJSON.error) {
                 if (responseJSON.code === '12') {
@@ -130,7 +162,7 @@ function AddNote({platform, router, openSnackbar, notes, getNotes}) {
         <>
         <PanelHeader
             separator
-            left={<PanelHeaderBack onClick={() => router.toBack()}/>}
+            left={<PanelHeaderBack onClick={() => openAlert()}/>}
         >
             Создать
         </PanelHeader>

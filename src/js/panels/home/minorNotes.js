@@ -1,24 +1,26 @@
-import React, { useState } from "react";
+import React, {useRef, useState} from "react";
 import {
+    ActionSheet, ActionSheetItem,
     Alert,
     Button,
     Card,
     Div,
     Footer,
     FormItem,
-    FormLayout, Headline,
-    Snackbar,
+    FormLayout, Header, Headline, Link, ScreenSpinner,
 } from "@vkontakte/vkui";
 import {
     Icon28CheckCircleOutline, Icon28CopyOutline,
     Icon28DeleteOutline,
-    Icon28EditOutline
+    Icon28EditOutline, Icon28MoreHorizontal
 } from "@vkontakte/icons";
 import declOfNum from '../../functions/delcOfNum';
 import bridge from "@vkontakte/vk-bridge";
 
-function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allNotes, getNotes}) {
+function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allNotes, getNotes, openSnackbarDel, scheme, setPopout, platform}) {
+    // eslint-disable-next-line
     const [snackbarDel, setSnackbarDel] = useState(null)
+    const TargetRef = useRef();
 
     const statuses = [
         'Открыт',
@@ -54,8 +56,52 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
         )
     }
 
+    function openDropdown(name, value, status, priority, id, index, stat, prior) {
+        setPopout(
+            <ActionSheet
+                onClose={() => setPopout(null)}
+                iosCloseItem={
+                    <ActionSheetItem autoclose mode="cancel">
+                        Отменить
+                    </ActionSheetItem>
+                }
+                toggleRef={TargetRef}
+            >
+                <ActionSheetItem
+                    autoclose
+                    before={<Icon28EditOutline/>}
+                    onClick={() => editNote(id, name, value, stat, prior)}
+                >
+                    Редактировать
+                </ActionSheetItem>
+                <ActionSheetItem
+                    autoclose
+                    before={<Icon28CopyOutline/>}
+                    onClick={() => {
+                        bridge.send(
+                            "VKWebAppCopyText",
+                            {
+                                text: `${name}\n\n${value}\n\nСтатус: ${status}\n\nПриоритет: ${priority}`});
+                        openSnackbar('Заметка скопирована!', <Icon28CheckCircleOutline/>)
+                    }}
+                >
+                    Скопировать
+                </ActionSheetItem>
+                <ActionSheetItem
+                    mode='destructive'
+                    autoclose
+                    before={<Icon28DeleteOutline/>}
+                    onClick={() => openAlert(id, index)}
+                >
+                    Удалить
+                </ActionSheetItem>
+            </ActionSheet>
+        )
+    }
+
     async function deleteNote(id) {
         try {
+            router.toPopout(<ScreenSpinner/>)
             let token = window.location.search.slice(1)
             let params = {
                 access_token: token,
@@ -79,26 +125,14 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
                     arr.count -= 1
                     getNotes(arr, false)
 
-                    openSnackbarDel()
+                    router.toBack()
+                    openSnackbar('Заметка удалена!', <Icon28DeleteOutline/>);
                     return
                 }
             })
         } catch (err) {
             console.log(err)
         }
-    }
-
-    function openSnackbarDel() {
-        setSnackbarDel(
-            <Snackbar
-                className='snack'
-                layout='vertical'
-                onClose={() => setSnackbarDel(null)}
-                before={<Icon28DeleteOutline/>}
-            >
-                Заметка удалена!
-            </Snackbar>
-        )
     }
 
     return (
@@ -111,11 +145,40 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
                                 <FormItem
                                     style={{whiteSpace: 'pre-line'}}
                                     top={
-                                        <Headline style={{whiteSpace: 'pre-line'}}>{el.name}</Headline>
+                                        <Header
+                                            className='more'
+                                            aside={platform === 'mobile_android' &&
+                                            <Link
+                                                onClick={() => {
+                                                    openDropdown(
+                                                        el.name,
+                                                        el.value,
+                                                        statuses[el.status],
+                                                        priorites[el.priority],
+                                                        el.noteId,
+                                                        index,
+                                                        el.status,
+                                                        el.priority
+                                                    );
+                                                }}
+                                                getRootRef={TargetRef}
+                                                className={scheme === 'space_gray' || scheme === 'vkcom_dark' ? 'search_blck' : 'search_wht'}
+                                            >
+                                                <Icon28MoreHorizontal/>
+                                            </Link>
+                                            }
+                                        >
+                                            <Headline
+                                                style={{whiteSpace: 'pre-line', color: '#828282'}}
+                                                weight='semibold'
+                                            >
+                                                {el.name}
+                                            </Headline>
+                                        </Header>
                                     }
                                     bottom={
                                         <>
-                                            Статус: {statuses[el.status]}, <br/>
+                                            Статус: {statuses[el.status]} <br/>
                                             Приоритет: <span className={el.priority === 3 && 'critical'}>{priorites[el.priority]}</span> <br/>
                                             Создано: {el.time} <br/>
                                             Отредактировано: {el.timeEdit}
@@ -124,6 +187,7 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
                                 >
                                     {el.value}
                                 </FormItem>
+                                {platform !== 'mobile_android' &&
                                 <FormItem>
                                     <Button
                                         className='btnNote'
@@ -156,13 +220,17 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
                                     >
                                         <Icon28DeleteOutline/>
                                     </Button>
-                                </FormItem>
+                                </FormItem>}
                             </FormLayout>
                         </Card>
                     </Div>
                 )
             })}
-            <Footer>Всего {minorNotes.count} {declOfNum(minorNotes.count, ['заметка', 'заметки', 'заметок'])}</Footer>
+            <Footer>{minorNotes.count !== 0 ?
+                `Всего ${minorNotes.count} ${declOfNum(minorNotes.count, ['заметка', 'заметки', 'заметок'])}`
+                :
+                'Тут нет заметок'
+            }</Footer>
             {snackbarDel}
         </>
     )

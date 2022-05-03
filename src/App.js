@@ -1,4 +1,4 @@
-import React, {lazy, Suspense, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { withRouter } from 'react-router-vkminiapps';
 
 import {
@@ -10,24 +10,25 @@ import {
     Epic,
     View,
     Panel,
-    ModalRoot,
-    ScreenSpinner,
     usePlatform,
     VKCOM,
     withAdaptivity,
-    Snackbar, Alert,
+    Snackbar, Alert, ScreenSpinner,
 } from "@vkontakte/vkui";
 
-import HomeBotsListModal from './js/components/modals/HomeBotsListModal';
-import HomeBotInfoModal from './js/components/modals/HomeBotInfoModal';
 import bridge from "@vkontakte/vk-bridge";
-import {Icon28CheckCircleOutline, Icon28ErrorCircleOutline} from "@vkontakte/icons";
+import {
+    Icon28CheckCircleOutline,
+    Icon28ErrorCircleOutline,
+    Icon28MessageCrossOutline,
+    Icon28MessageOutline
+} from "@vkontakte/icons";
 
-const HomePanelBase = lazy(() => import('./js/panels/home/base'));
-const AddNote = lazy(() => import('./js/panels/home/add'));
-const EditNote = lazy(() => import('./js/panels/home/edit'));
-const HomePanelPlaceholder = lazy(() => import('./js/panels/home/placeholder'));
-const ProfilePanelBase = lazy(() => import('./js/panels/profile/base'));
+import HomePanelBase from './js/panels/home/base';
+import AddNote from './js/panels/home/add';
+import EditNote from './js/panels/home/edit';
+import HomePanelPlaceholder from './js/panels/home/placeholder';
+import SearchNotes from './js/panels/home/search'
 
 let isFetchApi = false
 
@@ -47,6 +48,14 @@ const App = withAdaptivity(({ viewWidth, router }) => {
     const [middleNotes, setMiddleNotes] = useState({count: 0, items: []})
     const [majorNotes, setMajorNotes] = useState({count: 0, items: []})
     const [criticalNotes, setCriticalNotes] = useState({count: 0, items: []})
+    const [activeTab, setActiveTab] = useState('all')
+    const [popout, setPopout] = useState(null)
+    const [plat, setPlat] = useState('mobile_android')
+
+    async function getPlat() {
+        let aboba = window.location.search.slice(1).split('&')[6].split('=')[1]
+        setPlat(aboba)
+    }
 
     function openAlertAll() {
         router.toPopout(
@@ -59,7 +68,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                     title: 'Да',
                     autoclose: true,
                     mode: 'destructive',
-                    action: () => deleteAll()
+                    action: () => {deleteAll(); router.toBack()}
                 }]}
                 onClose={() => router.toPopout()}
                 header='Подтверждение'
@@ -68,8 +77,13 @@ const App = withAdaptivity(({ viewWidth, router }) => {
         )
     }
 
+    window.addEventListener('offline', () => openSnackbar('Интернет пропал', <Icon28MessageCrossOutline/>))
+
+    window.addEventListener('online', () => openSnackbar('Интернет появился', <Icon28MessageOutline/>))
+
     async function deleteAll() {
         try {
+            router.toPopout(<ScreenSpinner/>)
             let token = window.location.search.slice(1);
             let params = {
                 access_token: token,
@@ -85,6 +99,8 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                     body: JSON.stringify(params)
                 }
                 )
+
+            router.toBack()
             openSnackbar('Все заметки удалены!', <Icon28CheckCircleOutline/>)
 
             getNotes({ count: 0, items: [] })
@@ -94,13 +110,20 @@ const App = withAdaptivity(({ viewWidth, router }) => {
         }
     }
 
-    useEffect(() => {
-        getAppScheme(platform); 
+    async function changeTab(value) {
+        await bridge.send("VKWebAppStorageSet", {key: 'tab', value: value})
+        setActiveTab(value)
+    }
 
-        getNotes(); 
+    useEffect(() => {
+        getAppScheme();
+        getNotes();
+        changeTab('all');
+        getPlat()
     }, [])
 
     async function getNotes(value, isFetch) {
+        router.toPopout(<ScreenSpinner/>)
         if (!isFetchApi || isFetch) {
             try {
                 let token = window.location.search.slice(1);
@@ -131,6 +154,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
             setNotes(value)
             getMinorNotes(value);
         }
+        router.toBack()
     }
 
     async function getMinorNotes(value) {
@@ -159,19 +183,15 @@ const App = withAdaptivity(({ viewWidth, router }) => {
         setCriticalNotes({ count: result.length, items: result })
     }
 
-    async function getAppScheme(platform) {
-        if (platform === 'vkcom') {
-            setScheme('vkcom_light')
-        } else {
-            bridge.subscribe((e) => {
-                if (e.detail.type === 'VKWebAppUpdateConfig') {
-                    let data = e.detail.data.scheme
-                    setScheme(data)
-                }
+    async function getAppScheme() {
+        bridge.subscribe((e) => {
+            if (e.detail.type === 'VKWebAppUpdateConfig') {
+                let data = e.detail.data.scheme
+                setScheme(data)
+            }
             })
             let appScheme = await bridge.send("VKWebAppGetConfig")
             setScheme(appScheme.scheme)
-        }
     }
 
     async function openSnackbar(text, icon) {
@@ -200,48 +220,13 @@ const App = withAdaptivity(({ viewWidth, router }) => {
     const platform = isDesktop ? VKCOM : usePlatform()
     const hasHeader = isDesktop !== true
 
-    const modals = (
-        <ModalRoot activeModal={router.modal}>
-            <HomeBotsListModal
-                id="addNote"
-                openSnackbar = {(text, icon) => openSnackbar(text, icon)}
-                getNotes={(value) => getNotes(value)}
-                platform={platform}
-                onClose={() => router.toBack()}
-                router={router}
-                notes={notes}
-                setMinorNotes={(value) => setMinorNotes(value)}
-                setMiddleNotes={(value) => setMiddleNotes(value)}
-                setMajorNotes={(value) => setMajorNotes(value)}
-                setCriticalNotes={(value) => setCriticalNotes(value)}
-            />
-
-            <HomeBotInfoModal
-                openSnackbar = {(text, icon) => openSnackbar(text, icon)}
-                onClose={() => router.toBack()}
-                getNotes={() => getNotes('', true)}
-                id="editNote"
-                getMinorNotes={() => getMinorNotes()}
-                getMiddleNotes={() => getMiddleNotes()}
-                getMajorNotes={() => getMajorNotes()}
-                getCriticalNotes={() => getCriticalNotes()}
-                noteId={noteId}
-                noteName={noteName}
-                noteValue={noteValue}
-                noteStatus={noteStatus}
-                notePriority={notePriority}
-                platform={platform}
-                router={router}
-            />
-        </ModalRoot>
-    );
-
     return(
         <ConfigProvider platform={platform} isWebView scheme={scheme}>
             <AppRoot>
                 <SplitLayout
                     header={hasHeader && <PanelHeader separator={false} />}
                     style={{ justifyContent: "center" }}
+                    popout={popout}
                 >
                     <SplitCol
                         animate={!isDesktop}
@@ -256,107 +241,120 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                             id='home'
                             activePanel={router.activePanel === 'route_modal' ? 'base' : router.activePanel}
                             popout={router.popout}
-                            modal={modals}
                         >
                             <Panel id='base'>
-                                <Suspense fallback={<ScreenSpinner/>}>
-                                    <HomePanelBase
-                                        openSnackbar={(text, icon) => openSnackbar(text, icon)}
-                                        editNote={
-                                            (noteId,
-                                             noteName,
-                                             noteValue,
-                                             noteStatus,
-                                             notePriority
-                                            ) => editNote(
-                                                noteId,
-                                                noteName,
-                                                noteValue,
-                                                noteStatus,
-                                                notePriority
-                                            )
-                                        }
-                                        minorNotes={minorNotes}
-                                        middleNotes={middleNotes}
-                                        majorNotes={majorNotes}
-                                        criticalNotes={criticalNotes}
-                                        setCriticalNotes={(value) => setCriticalNotes(value)}
-                                        allNotes={notes}
-                                        getNotes={(value, isFetch) => getNotes(value, isFetch)}
-                                        router={router}
-                                        isDesktop={isDesktop}
-                                    />
-                                </Suspense>
+                                <HomePanelBase
+                                    openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                                    editNote={
+                                        (noteId,
+                                         noteName,
+                                         noteValue,
+                                         noteStatus,
+                                         notePriority
+                                        ) => editNote(
+                                            noteId,
+                                            noteName,
+                                            noteValue,
+                                            noteStatus,
+                                            notePriority
+                                        )
+                                    }
+                                    minorNotes={minorNotes}
+                                    middleNotes={middleNotes}
+                                    majorNotes={majorNotes}
+                                    criticalNotes={criticalNotes}
+                                    setCriticalNotes={(value) => setCriticalNotes(value)}
+                                    allNotes={notes}
+                                    getNotes={(value, isFetch) => getNotes(value, isFetch)}
+                                    router={router}
+                                    isDesktop={isDesktop}
+                                    setSnackbar={(value) => setSnackbar(value)}
+                                    scheme={scheme}
+                                    changeTab={(value) => changeTab(value)}
+                                    activeTab={activeTab}
+                                    setActiveTab={(value) => setActiveTab(value)}
+                                    setPopout={(value) => setPopout(value)}
+                                    platform={plat}
+                                />
                                 {snackbar}
                             </Panel>
 
                     <Panel id='add'>
-                      <Suspense fallback={<ScreenSpinner/>}>
-                          <AddNote
-                              openSnackbar = {(text, icon) => openSnackbar(text, icon)}
-                              getNotes={(value) => getNotes(value)}
-                              platform={platform}
-                              onClose={() => router.toBack()}
-                              router={router}
-                              notes={notes}
-                              setMinorNotes={(value) => setMinorNotes(value)}
-                              setMiddleNotes={(value) => setMiddleNotes(value)}
-                              setMajorNotes={(value) => setMajorNotes(value)}
-                              setCriticalNotes={(value) => setCriticalNotes(value)}
-                          />
-                      </Suspense>
+                      <AddNote
+                          openSnackbar = {(text, icon) => openSnackbar(text, icon)}
+                          getNotes={(value) => getNotes(value)}
+                          platform={platform}
+                          onClose={() => router.toBack()}
+                          router={router}
+                          notes={notes}
+                          setMinorNotes={(value) => setMinorNotes(value)}
+                          setMiddleNotes={(value) => setMiddleNotes(value)}
+                          setMajorNotes={(value) => setMajorNotes(value)}
+                          setCriticalNotes={(value) => setCriticalNotes(value)}
+                          setSnackbar={(value) => setSnackbar(value)}
+                      />
                         {snackbar}
                     </Panel>
                     <Panel id='edit'>
-                        <Suspense fallback={<ScreenSpinner/>}>
-                            <EditNote
-                                router={router}
-                                platform={platform}
-                                getNotes={() => getNotes('', true)}
-                                getMinorNotes={() => getMinorNotes()}
-                                getMiddleNotes={() => getMiddleNotes()}
-                                getMajorNotes={() => getMajorNotes()}
-                                getCriticalNotes={() => getCriticalNotes()}
-                                noteId={noteId}
-                                noteName={noteName}
-                                noteValue={noteValue}
-                                noteStatus={noteStatus}
-                                notePriority={notePriority}
-                                openSnackbar={(text, icon) => openSnackbar(text, icon)}
-                                scheme={scheme}
-                            />
-                        </Suspense>
+                        <EditNote
+                            router={router}
+                            platform={platform}
+                            getNotes={() => getNotes('', true)}
+                            getMinorNotes={() => getMinorNotes()}
+                            getMiddleNotes={() => getMiddleNotes()}
+                            getMajorNotes={() => getMajorNotes()}
+                            getCriticalNotes={() => getCriticalNotes()}
+                            noteId={noteId}
+                            noteName={noteName}
+                            noteValue={noteValue}
+                            noteStatus={noteStatus}
+                            notePriority={notePriority}
+                            openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                            scheme={scheme}
+                            setSnackbar={(value) => setSnackbar(value)}
+                        />
                         {snackbar}
                     </Panel>
                     <Panel id='settings'>
-                        <Suspense fallback={<ScreenSpinner/>}>
-                            <HomePanelPlaceholder
-                                router={router}
-                                platform={platform}
-                                openSnackbar={(text, icon) => openSnackbar(text, icon)}
-                                getNotes={() => getNotes()}
-                                deleteAll={() => deleteAll()}
-                                openAlertAll={() => openAlertAll()}
-                                snackbar={snackbar}
-                                allNotes={notes}
-                            />
-                        </Suspense>
-                    </Panel>
-                  </View>
-
-                  <View
-                    id="profile"
-                    activePanel={router.activePanel}
-                    popout={router.popout}
-                    modal={modals}
-                  >
-                    <Panel id='base'>
-                      <Suspense fallback={<ScreenSpinner/>}>
-                        <ProfilePanelBase
-                          router={router}
-                          isDesktop={isDesktop}
+                        <HomePanelPlaceholder
+                            router={router}
+                            platform={platform}
+                            openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                            getNotes={() => getNotes()}
+                            deleteAll={() => deleteAll()}
+                            openAlertAll={() => openAlertAll()}
+                            snackbar={snackbar}
+                            allNotes={notes}
+                            setSnackbar={(value) => setSnackbar(value)}
                         />
-                      </Suspense>
+                        {snackbar}
+                    </Panel>
+                    <Panel id='search'>
+                        <SearchNotes
+                            router={router}
+                            allNotes={notes}
+                            openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                            getNotes={(value, isFetch) => getNotes(value, isFetch)}
+                            editNote={
+                                (noteId,
+                                 noteName,
+                                 noteValue,
+                                 noteStatus,
+                                 notePriority
+                                ) => editNote(
+                                    noteId,
+                                    noteName,
+                                    noteValue,
+                                    noteStatus,
+                                    notePriority
+                                )
+                            }
+                            setSnackbar={(value) => setSnackbar(value)}
+                            scheme={scheme}
+                            setPopout={(value) => setPopout(value)}
+                            platform={plat}
+                        />
+                        {snackbar}
                     </Panel>
                   </View>
                 </Epic>

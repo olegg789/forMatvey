@@ -22,20 +22,37 @@ import {
 import bridge from "@vkontakte/vk-bridge";
 
 
-function HomePanelPlaceholder({isDesktop, router, openSnackbar, getNotes, openAlertAll, snackbar, allNotes}) {
-    const [plat, setPlat] = useState('android')
+function HomePanelPlaceholder({
+      isDesktop,
+      router,
+      openSnackbar,
+      getNotes,
+      openAlertAll,
+      snackbar,
+      allNotes,
+      setSnackbar
+}) {
+    const [platform, setPlatform] = useState('aboba')
+    const [favorite, setFavorite] = useState(1)
 
-    function getPlat() {
-        let parsedUrl = new URL(window.location.href)
-        if (parsedUrl.searchParams.get('vk_platform') === 'desktop_web') {
-            setPlat('vkcom')
-        }
+    async function getPlat() {
+        let check = await bridge.send("VKWebAppGetLaunchParams")
+        setPlatform(check.vk_platform)
+        console.log(check)
     }
 
     useEffect(
-        () => {getPlat()}, []
+        () => {
+            getPlat();
+            setSnackbar(null);
+            checkFavorite()
+            }, []
     )
 
+    async function checkFavorite() {
+        const favorite = await bridge.send("VKWebAppGetLaunchParams")
+        setFavorite(favorite.vk_is_favorite)
+    }
 
     return(
         <>
@@ -62,6 +79,7 @@ function HomePanelPlaceholder({isDesktop, router, openSnackbar, getNotes, openAl
                         >
                             Удалить все заметки
                         </SimpleCell>}
+                    {favorite === 0 &&
                     <SimpleCell
                         className='btn_settings'
                         before={
@@ -72,12 +90,16 @@ function HomePanelPlaceholder({isDesktop, router, openSnackbar, getNotes, openAl
                                 <Icon28FavoriteOutline fill='#EC49E7'/>
                             </Avatar>
                         }
-                        onClick={() => bridge.send("VKWebAppAddToFavorites")}
+                        onClick={() => {
+                            bridge.send("VKWebAppAddToFavorites").then(
+                                (data) => {data.result === true && setFavorite(1)}
+                            )
+                        }}
                     >
                         Добавить в избранное
-                    </SimpleCell>
+                    </SimpleCell>}
 
-                    {plat === 'android' &&
+                    {platform !== 'desktop_web' && platform !== 'mobile_web' && platform !== 'mobile_ios' &&
                         <SimpleCell
                             className='btn_settings'
                             before={

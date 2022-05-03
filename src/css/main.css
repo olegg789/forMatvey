@@ -1,3 +1,12 @@
+body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .div-center {
     display: table;
     margin: 0 auto;
@@ -59,7 +68,7 @@
 }
 
 .critical {
-    color: var(--vkui--color_text_negative);
+    color: #E64646;
 }
 
 .all {
@@ -78,4 +87,24 @@
 
 .plch_blck {
     color: white;
+}
+
+.search_wht {
+    color: black;
+}
+
+.search_blck {
+    color: white;
+}
+
+.more {
+    margin-left: -14px;
+    margin-right: -18px;
+    margin-top: -15px;
+    margin-bottom: -15px;
+}
+
+.vkuiPopperPortal {
+    position: relative;
+    z-index: 100;
 }

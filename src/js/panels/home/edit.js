@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
     withPlatform,
@@ -9,11 +9,30 @@ import {
     FormLayout,
     PanelHeader,
     Group,
-    PanelHeaderBack, CustomSelect, CustomSelectOption
+    PanelHeaderBack,
+    CustomSelect,
+    CustomSelectOption,
+    ScreenSpinner, Alert
 } from "@vkontakte/vkui";
 import {Icon28CheckCircleOutline, Icon28CancelCircleOutline} from '@vkontakte/icons'
 
-function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNotes, platform, getNotes, openSnackbar, router, noteId, noteName, noteValue, noteStatus, notePriority, scheme}) {
+function EditNote({
+      getMinorNotes,
+      getMiddleNotes,
+      getMajorNotes,
+      getCriticalNotes,
+      platform,
+      getNotes,
+      openSnackbar,
+      router,
+      noteId,
+      noteName,
+      noteValue,
+      noteStatus,
+      notePriority,
+      scheme,
+      setSnackbar
+}) {
 
     const [note, setNote] = useState(noteName)
     const [value, setValue] = useState(noteValue)
@@ -36,6 +55,7 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
         {value: '3', priority: 'Критический'}
     ]
 
+    useEffect(() => {setSnackbar(null)}, [])
 
     async function oncChange(e) {
 
@@ -62,6 +82,7 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
 
     async function edit() {
         try {
+            router.toPopout(<ScreenSpinner/>)
             let token = window.location.search.slice(1)
             let params = {
                 method: 'notes.editNote',
@@ -110,18 +131,42 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
                 else if (responseJSON.code === '7') {
                     openSnackbar('Кто-то флудит, ай-яй!', <Icon28CancelCircleOutline/>)
                 }
+                else if (responseJSON.code === 50) {
+                    openSnackbar('Заметка не найдена. Возможно, она была удалена', <Icon28CancelCircleOutline/>)
+                }
             }
+            router.toBack()
         }
         catch (err) {
             console.log(err)
         }
     }
 
+    function openAlert() {
+        router.toPopout(
+            <Alert
+                actions={[{
+                    title: 'Нет',
+                    autoclose: true,
+                    mode: 'cancel',
+                }, {
+                    title: 'Да',
+                    autoclose: true,
+                    mode: 'destructive',
+                    action: () => {router.toBack(); router.toBack()}
+                }]}
+                onClose={() => router.toPopout()}
+                header='Подтверждение'
+                text='Вы точно хотите выйти? Введённые значения не сохранятся.'
+            />
+        )
+    }
+
     return (
         <>
             <PanelHeader
                 separator
-                left={<PanelHeaderBack onClick={() => router.toBack()}/>}
+                left={<PanelHeaderBack onClick={() => openAlert()}/>}
             >
                 Редактирование
             </PanelHeader>
@@ -157,7 +202,7 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
                     >
                         <CustomSelect
                             name='status'
-                            placeholder={<span className={scheme === 'space_gray' ? 'plch_blck' : 'plch_wht'}>{statuses[status].status}</span>}
+                            placeholder={<span className={scheme === 'space_gray' || scheme === 'vkcom_dark' ? 'plch_blck' : 'plch_wht'}>{statuses[status].status}</span>}
                             onChange={(e) => oncChange(e)}
                             options={statuses.map((el) => ({
                                 label: el.status,
@@ -175,7 +220,7 @@ function EditNote({getMinorNotes, getMiddleNotes, getMajorNotes, getCriticalNote
                     >
                         <CustomSelect
                             name='priority'
-                            placeholder={<span className={scheme === 'space_gray' ? 'plch_blck' : 'plch_wht'}>{priorities[priority].priority}</span>}
+                            placeholder={<span className={scheme === 'space_gray' || scheme === 'vkcom_dark' ? 'plch_blck' : 'plch_wht'}>{priorities[priority].priority}</span>}
                             onChange={(e) => oncChange(e)}
                             options={priorities.map((el) => ({
                                 label: el.priority,

@@ -21,6 +21,11 @@ const structure = [
 			{
 				id: "settings",
 				hash: '/settings'
+			},
+
+			{
+				id: "search",
+				hash: "/search"
 			}
 		]
 	},

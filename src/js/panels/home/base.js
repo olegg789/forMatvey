@@ -1,24 +1,22 @@
-import React, { useState } from 'react';
+import React, {useEffect} from 'react';
 
 import {
     Div,
     Group,
     Button,
     PanelHeader,
-    ScreenSpinner,
     Header,
     PullToRefresh,
     Placeholder,
-    Snackbar,
-    Alert,
     Tabs,
     TabsItem,
     HorizontalScroll,
     PanelHeaderButton,
+    Link
 } from '@vkontakte/vkui'
 import {
+    Icon28SearchOutline,
     Icon28AddOutline,
-    Icon28DeleteOutline,
     Icon28SettingsOutline,
 } from '@vkontakte/icons'
 
@@ -27,6 +25,7 @@ import MinorNotes from './minorNotes';
 import MiddleNotes from './middleNotes';
 import MajorNotes from './majorNotes';
 import CriticalNotes from './criticalNotes';
+import bridge from "@vkontakte/vk-bridge";
 
 function HomePanelBase(
     {
@@ -41,55 +40,28 @@ function HomePanelBase(
         majorNotes,
         criticalNotes,
         setCriticalNotes,
-        getNotes
+        getNotes,
+        setSnackbar,
+        scheme,
+        changeTab,
+        activeTab,
+        setActiveTab,
+        setPopout,
+        platform
     }) {
 
-    // eslint-disable-next-line
-    const [snackbarDel, setSnackbarDel] = useState(null)
-    const [activeTab, setActiveTab] = useState('all')
-    // eslint-disable-next-line
-    async function openSpinner() {
-        router.toPopout(<ScreenSpinner/>)
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        router.toPopout()
+    useEffect(() => {getLastTab()}, [])
+
+    async function getLastTab() {
+        if (activeTab !== 'all') {
+            const res = await bridge.send("VKWebAppStorageGet", {keys: ['tab']})
+            const tab = res.keys[0].value
+            setActiveTab(tab)
+        }
     }
 
     async function addNote() {
         router.toPanel('add');
-    }
-
-    function openSnackbarDel() {
-        setSnackbarDel(
-            <Snackbar
-                className={!isDesktop && 'snack'}
-                layout='vertical'
-                onClose={() => setSnackbarDel(null)}
-                before={<Icon28DeleteOutline/>}
-            >
-                Заметка удалена!
-            </Snackbar>
-        )
-    }
-
-    // eslint-disable-next-line
-    function openAlert(id) {
-        router.toPopout(
-            <Alert
-                actions={[{
-                    title: 'Нет',
-                    autoclose: true,
-                    mode: 'cancel',
-                }, {
-                    title: 'Да',
-                    autoclose: true,
-                    mode: 'destructive',
-                    action: () => {deleteNote(id); openSnackbarDel()}
-                }]}
-                onClose={() => router.toPopout()}
-                header='Подтверждение'
-                text='Вы точно хотите удалить эту заметку?'
-            />
-        )
     }
 
     async function deleteNote(id) {
@@ -114,15 +86,14 @@ function HomePanelBase(
             let responseJSON = await response.json()
             console.log(response)
             getNotes()
-        }
-        catch (err) {
+        } catch (err) {
             console.log(err)
         }
     }
 
+
     return (
         <>
-            <PullToRefresh onRefresh={() => {openSpinner(); getNotes('', true)}}>
             <PanelHeader
                 left={
                     <PanelHeaderButton
@@ -135,15 +106,17 @@ function HomePanelBase(
             >
                 Заметки
             </PanelHeader>
+            <PullToRefresh onRefresh={() => {getNotes('', true)}}>
             <Group>
                 <Div>
                     <Button
                         stretched
                         size='l'
-                        before={<Icon28AddOutline/>}
+                        before={allNotes.count < 200 && <Icon28AddOutline/>}
                         onClick={() => {addNote(); setActiveTab('all')}}
+                        disabled={allNotes.count >= 200}
                     >
-                        Создать заметку
+                        {allNotes.count >= 200 ? 'Лимит заметок' : 'Создать заметку'}
                     </Button>
                 </Div>
             </Group>
@@ -151,7 +124,15 @@ function HomePanelBase(
                 separator='hide'
                 header={
                     <Header
-                        mode='secondary'
+                        mode='primary'
+                        aside={allNotes.count !== 0 &&
+                            <Link
+                                className={scheme === 'space_gray' || scheme === 'vkcom_dark' ? 'search_blck' : 'search_wht'}
+                                onClick={() => router.toPanel('search')}
+                            >
+                                <Icon28SearchOutline/>
+                            </Link>
+                        }
                     >
                         Мои заметки
                     </Header>
@@ -166,30 +147,30 @@ function HomePanelBase(
                                         <TabsItem
                                             className='all'
                                             selected={activeTab === 'all'}
-                                            onClick={() => setActiveTab('all')}
+                                            onClick={() => changeTab('all')}
                                         >
                                             Все
                                         </TabsItem>
                                         <TabsItem
-                                            onClick={() => setActiveTab('critical')}
+                                            onClick={() => changeTab('critical')}
                                             selected={activeTab === 'critical'}
                                         >
                                             Критический
                                         </TabsItem>
                                         <TabsItem
-                                            onClick={() => setActiveTab('major')}
+                                            onClick={() => changeTab('major')}
                                             selected={activeTab === 'major'}
                                         >
                                             Высокий
                                         </TabsItem>
                                         <TabsItem
-                                            onClick={() => setActiveTab('middle')}
+                                            onClick={() => changeTab('middle')}
                                             selected={activeTab === 'middle'}
                                         >
                                             Средний
                                         </TabsItem>
                                         <TabsItem
-                                            onClick={() => setActiveTab('minor')}
+                                            onClick={() => changeTab('minor')}
                                             selected={activeTab === 'minor'}
                                         >
                                             Низкий
@@ -206,6 +187,9 @@ function HomePanelBase(
                                 editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
                                 openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                                scheme={scheme}
+                                setPopout={(value) => setPopout(value)}
+                                platform={platform}
                             />
                         }
                         {activeTab === 'minor' &&
@@ -217,6 +201,9 @@ function HomePanelBase(
                                 editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
                                 openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                                scheme={scheme}
+                                setPopout={(value) => setPopout(value)}
+                                platform={platform}
                             />
                         }
                         {activeTab === 'middle' &&
@@ -228,6 +215,9 @@ function HomePanelBase(
                                 editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
                                 openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                                scheme={scheme}
+                                setPopout={(value) => setPopout(value)}
+                                platform={platform}
                             />
                         }
                         {activeTab === 'major' &&
@@ -239,6 +229,9 @@ function HomePanelBase(
                                 editNote={editNote}
                                 deleteNote={(id) => deleteNote(id)}
                                 openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                                scheme={scheme}
+                                setPopout={(value) => setPopout(value)}
+                                platform={platform}
                             />
                         }
                         {activeTab === 'critical' &&
@@ -251,6 +244,9 @@ function HomePanelBase(
                                 setCriticalNotes={(value) => setCriticalNotes(value)}
                                 deleteNote={(id) => deleteNote(id)}
                                 openSnackbar={(text, icon) => openSnackbar(text, icon)}
+                                scheme={scheme}
+                                setPopout={(value) => setPopout(value)}
+                                platform={platform}
                             />
                         }
 
@@ -259,7 +255,6 @@ function HomePanelBase(
                 }
             </Group>
             </PullToRefresh>
-            {snackbarDel}
         </>
     );
 }
