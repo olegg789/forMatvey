@@ -20,6 +20,7 @@
     "react-scripts": "^2.1.8"
   },
   "dependencies": {
+    "@reyzitwo/react-router-vkminiapps": "^1.0.0",
     "@vkontakte/icons": "^1.16.1",
     "@vkontakte/vk-bridge": "^2.4.1",
     "@vkontakte/vkui": "^4.23.0",
@@ -29,8 +30,7 @@
     "eruda-dom": "^2.0.0",
     "gh-pages": "^3.2.3",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "react-router-vkminiapps": "^1.2.3"
+    "react-dom": "^16.12.0"
   },
   "browserslist": [
     ">0.2%",

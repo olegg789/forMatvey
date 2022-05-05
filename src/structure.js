@@ -10,7 +10,7 @@ const structure = [
 
 			{
 				id: "add",
-				hash: '/add'
+				hash: ''
 			},
 
 			{
@@ -20,23 +20,12 @@ const structure = [
 
 			{
 				id: "settings",
-				hash: '/settings'
+				hash: ''
 			},
 
 			{
 				id: "search",
-				hash: "/search"
-			}
-		]
-	},
-
-	{
-		id: "profile",
-		hash: "profile",
-		panels: [
-			{
-				id: "base",
-				hash: '/base'
+				hash: ""
 			}
 		]
 	}

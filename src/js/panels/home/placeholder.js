@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, /*useState*/} from 'react';
 
 import {
     PanelHeader,
@@ -11,10 +11,10 @@ import {
     Div,
 } from "@vkontakte/vkui";
 import {
-    Icon28SmartphoneOutline,
+    //Icon28SmartphoneOutline,
     Icon28MessagesOutline,
     Icon28ShareOutline,
-    Icon28FavoriteOutline,
+    //Icon28FavoriteOutline,
     Icon28DeleteOutline,
     Icon16LikeOutline,
     Icon20BugOutline,
@@ -30,29 +30,29 @@ function HomePanelPlaceholder({
       openAlertAll,
       snackbar,
       allNotes,
-      setSnackbar
+      setSnackbar,
 }) {
-    const [platform, setPlatform] = useState('aboba')
-    const [favorite, setFavorite] = useState(1)
 
-    async function getPlat() {
-        let check = await bridge.send("VKWebAppGetLaunchParams")
-        setPlatform(check.vk_platform)
-        console.log(check)
+    /*const [favorite, setFavorite] = useState('1')
+    const [plat, setPlat] = useState('mobile_android')
+
+    function getPlat() {
+        let aboba = window.location.search.slice(1).split('&')[6].split('=')[1]
+        setPlat(aboba)
     }
+
+    function checkFav() {
+        let aboba = window.location.search.slice(1).split('&')[4].split('=')[1]
+        setFavorite(aboba)
+    }*/
 
     useEffect(
         () => {
-            getPlat();
             setSnackbar(null);
-            checkFavorite()
+            /*checkFav();
+            getPlat()*/
             }, []
     )
-
-    async function checkFavorite() {
-        const favorite = await bridge.send("VKWebAppGetLaunchParams")
-        setFavorite(favorite.vk_is_favorite)
-    }
 
     return(
         <>
@@ -79,7 +79,7 @@ function HomePanelPlaceholder({
                         >
                             Удалить все заметки
                         </SimpleCell>}
-                    {favorite === 0 &&
+                    {/*favorite === '0' &&
                     <SimpleCell
                         className='btn_settings'
                         before={
@@ -99,7 +99,7 @@ function HomePanelPlaceholder({
                         Добавить в избранное
                     </SimpleCell>}
 
-                    {platform !== 'desktop_web' && platform !== 'mobile_web' && platform !== 'mobile_ios' &&
+                    {plat === 'mobile_android' &&
                         <SimpleCell
                             className='btn_settings'
                             before={
@@ -114,7 +114,7 @@ function HomePanelPlaceholder({
                         >
                             Добавить на главный экран
                         </SimpleCell>
-                    }
+                    */}
 
                     <SimpleCell
                         className='btn_settings'
@@ -149,7 +149,7 @@ function HomePanelPlaceholder({
 
             <Footer>
                 <Div className="podpis">
-                    От <Link href="https://vk.com/olejii" target="_blank">@olejii</Link> и <Link href="https://vk.com/dez.code" target="_blank">@dez.code</Link>
+                    От <Link href="https://vk.com/id510624674" target="_blank">@olejii</Link> и <Link href="https://vk.com/id403701496" target="_blank">@this.state.backend</Link>
                 </Div>
                 <Div className="podpis">
                     Сделано с <Icon16LikeOutline width={16} height={16}/> и <Icon20BugOutline width={16} height={16}/>

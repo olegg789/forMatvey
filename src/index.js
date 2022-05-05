@@ -4,7 +4,7 @@ import 'core-js/es6/set';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Router from 'react-router-vkminiapps';
+import Router from '@reyzitwo/react-router-vkminiapps';
 import structure from './structure';
 import App from './App';
 

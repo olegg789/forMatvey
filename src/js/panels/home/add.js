@@ -52,7 +52,6 @@ function AddNote({platform, router, openSnackbar, notes, getNotes, setSnackbar})
         else if (name === 'value') {
             setValue(value)
             setCountValue(`${value.length}/300`)
-            console.log(value)
         }
 
         else if (name === 'status') {
@@ -62,6 +61,7 @@ function AddNote({platform, router, openSnackbar, notes, getNotes, setSnackbar})
         else if (name === 'priority') {
             setPriority(value)
         }
+
     }
 
     function openAlert() {
@@ -126,8 +126,6 @@ function AddNote({platform, router, openSnackbar, notes, getNotes, setSnackbar})
                 })
                 getNotes(arr)
 
-                console.log(responseJSON.value)
-
                 router.toBack()
                 openSnackbar('Заметка создана!', <Icon28CheckCircleOutline/>)
 
@@ -162,7 +160,7 @@ function AddNote({platform, router, openSnackbar, notes, getNotes, setSnackbar})
         <>
         <PanelHeader
             separator
-            left={<PanelHeaderBack onClick={() => openAlert()}/>}
+            left={<PanelHeaderBack onClick={() => {openAlert()}}/>}
         >
             Создать
         </PanelHeader>

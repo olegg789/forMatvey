@@ -2,7 +2,6 @@ import React, {useRef, useState} from "react";
 import {
     ActionSheet, ActionSheetItem,
     Alert,
-    Button,
     Card,
     Div,
     Footer,
@@ -17,7 +16,7 @@ import {
 import declOfNum from '../../functions/delcOfNum';
 import bridge from "@vkontakte/vk-bridge";
 
-function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allNotes, getNotes, openSnackbarDel, scheme, setPopout, platform}) {
+function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allNotes, getNotes, openSnackbarDel, scheme, setPopout, platform, offline}) {
     // eslint-disable-next-line
     const [snackbarDel, setSnackbarDel] = useState(null)
     const TargetRef = useRef();
@@ -56,7 +55,7 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
         )
     }
 
-    function openDropdown(name, value, status, priority, id, index, stat, prior) {
+    function openDropdown(name, value, status, priority, id, index, stat, prior, ref) {
         setPopout(
             <ActionSheet
                 onClose={() => setPopout(null)}
@@ -65,7 +64,7 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
                         Отменить
                     </ActionSheetItem>
                 }
-                toggleRef={TargetRef}
+                toggleRef={ref}
             >
                 <ActionSheetItem
                     autoclose
@@ -147,9 +146,9 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
                                     top={
                                         <Header
                                             className='more'
-                                            aside={platform === 'mobile_android' &&
+                                            aside={!offline &&
                                             <Link
-                                                onClick={() => {
+                                                onClick={(e) => {
                                                     openDropdown(
                                                         el.name,
                                                         el.value,
@@ -158,7 +157,8 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
                                                         el.noteId,
                                                         index,
                                                         el.status,
-                                                        el.priority
+                                                        el.priority,
+                                                        e.currentTarget
                                                     );
                                                 }}
                                                 getRootRef={TargetRef}
@@ -187,40 +187,6 @@ function MinorNotes({minorNotes, router, isDesktop, editNote, openSnackbar, allN
                                 >
                                     {el.value}
                                 </FormItem>
-                                {platform !== 'mobile_android' &&
-                                <FormItem>
-                                    <Button
-                                        className='btnNote'
-                                        mode='outline'
-                                        onClick={() => editNote(el.noteId, el.name, el.value, el.status, el.priority)}
-                                        sizeY='regular'
-                                    >
-                                        <Icon28EditOutline/>
-                                    </Button>
-                                    <Button
-                                        className='btnNote'
-                                        mode='outline'
-                                        onClick={() => {
-                                            bridge.send(
-                                                "VKWebAppCopyText",
-                                                {
-                                                    text: `${el.name}\n\n${el.value}\n\nСтатус: ${statuses[el.status]}\n\nПриоритет: ${priorites[el.priority]}`});
-                                            openSnackbar('Заметка скопирована!', <Icon28CheckCircleOutline/>)
-                                        }}
-                                        sizeY='regular'
-                                    >
-                                        <Icon28CopyOutline/>
-                                    </Button>
-                                    <Button
-                                        className='btnNote'
-                                        mode='outline'
-                                        appearance='negative'
-                                        sizeY='regular'
-                                        onClick={() => openAlert(el.noteId, index)}
-                                    >
-                                        <Icon28DeleteOutline/>
-                                    </Button>
-                                </FormItem>}
                             </FormLayout>
                         </Card>
                     </Div>

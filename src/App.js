@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { withRouter } from 'react-router-vkminiapps';
+import { withRouter } from '@reyzitwo/react-router-vkminiapps';
 
 import {
     ConfigProvider,
@@ -51,10 +51,17 @@ const App = withAdaptivity(({ viewWidth, router }) => {
     const [activeTab, setActiveTab] = useState('all')
     const [popout, setPopout] = useState(null)
     const [plat, setPlat] = useState('mobile_android')
+    const [offline, setOffline] = useState(false)
+    const [favorite, setFavorite] = useState(1)
 
-    async function getPlat() {
+    function getPlat() {
         let aboba = window.location.search.slice(1).split('&')[6].split('=')[1]
         setPlat(aboba)
+    }
+
+    function checkFav() {
+        let aboba = window.location.search.slice(1).split('&')[4].split('=')[1]
+        setFavorite(Number(aboba))
     }
 
     function openAlertAll() {
@@ -77,9 +84,9 @@ const App = withAdaptivity(({ viewWidth, router }) => {
         )
     }
 
-    window.addEventListener('offline', () => openSnackbar('Интернет пропал', <Icon28MessageCrossOutline/>))
+    window.addEventListener('offline', () => {openSnackbar('Интернет пропал', <Icon28MessageCrossOutline/>); setOffline(true)})
 
-    window.addEventListener('online', () => openSnackbar('Интернет появился', <Icon28MessageOutline/>))
+    window.addEventListener('online', () => {openSnackbar('Интернет появился', <Icon28MessageOutline/>); setOffline(false)})
 
     async function deleteAll() {
         try {
@@ -119,7 +126,8 @@ const App = withAdaptivity(({ viewWidth, router }) => {
         getAppScheme();
         getNotes();
         changeTab('all');
-        getPlat()
+        getPlat();
+        checkFav()
     }, [])
 
     async function getNotes(value, isFetch) {
@@ -275,6 +283,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                                     setActiveTab={(value) => setActiveTab(value)}
                                     setPopout={(value) => setPopout(value)}
                                     platform={plat}
+                                    offline={offline}
                                 />
                                 {snackbar}
                             </Panel>
@@ -318,7 +327,6 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                     <Panel id='settings'>
                         <HomePanelPlaceholder
                             router={router}
-                            platform={platform}
                             openSnackbar={(text, icon) => openSnackbar(text, icon)}
                             getNotes={() => getNotes()}
                             deleteAll={() => deleteAll()}
@@ -326,6 +334,9 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                             snackbar={snackbar}
                             allNotes={notes}
                             setSnackbar={(value) => setSnackbar(value)}
+                            platform={plat}
+                            favorite={favorite}
+                            setFavorite={(value) => setFavorite(value)}
                         />
                         {snackbar}
                     </Panel>
@@ -353,6 +364,7 @@ const App = withAdaptivity(({ viewWidth, router }) => {
                             scheme={scheme}
                             setPopout={(value) => setPopout(value)}
                             platform={plat}
+                            offline={offline}
                         />
                         {snackbar}
                     </Panel>

@@ -17,7 +17,7 @@ import {
 import {
     Icon28SearchOutline,
     Icon28AddOutline,
-    Icon28SettingsOutline,
+    Icon28SettingsOutline, Icon28MessageCrossOutline,
 } from '@vkontakte/icons'
 
 import AllNotes from './allNotes';
@@ -47,7 +47,8 @@ function HomePanelBase(
         activeTab,
         setActiveTab,
         setPopout,
-        platform
+        platform,
+        offline
     }) {
 
     useEffect(() => {getLastTab()}, [])
@@ -95,7 +96,7 @@ function HomePanelBase(
     return (
         <>
             <PanelHeader
-                left={
+                left={!offline &&
                     <PanelHeaderButton
                         onClick={() => router.toPanel('settings')}
                     >
@@ -106,7 +107,7 @@ function HomePanelBase(
             >
                 Заметки
             </PanelHeader>
-            <PullToRefresh onRefresh={() => {getNotes('', true)}}>
+            <PullToRefresh onRefresh={() => {!offline ? getNotes('', true) : openSnackbar('Нет интернета!', <Icon28MessageCrossOutline/>)}}>
             <Group>
                 <Div>
                     <Button
@@ -114,7 +115,7 @@ function HomePanelBase(
                         size='l'
                         before={allNotes.count < 200 && <Icon28AddOutline/>}
                         onClick={() => {addNote(); setActiveTab('all')}}
-                        disabled={allNotes.count >= 200}
+                        disabled={allNotes.count >= 200 || offline}
                     >
                         {allNotes.count >= 200 ? 'Лимит заметок' : 'Создать заметку'}
                     </Button>
@@ -141,6 +142,7 @@ function HomePanelBase(
                 {allNotes.count !== 0 ?
                     <>
                         <Div>
+                            {!offline &&
                             <Group>
                                 <Tabs mode="buttons">
                                     <HorizontalScroll>
@@ -177,7 +179,7 @@ function HomePanelBase(
                                         </TabsItem>
                                     </HorizontalScroll>
                                 </Tabs>
-                            </Group>
+                            </Group>}
                         </Div>
                         {activeTab === 'all' &&
                             <AllNotes 
@@ -190,6 +192,7 @@ function HomePanelBase(
                                 scheme={scheme}
                                 setPopout={(value) => setPopout(value)}
                                 platform={platform}
+                                offline={offline}
                             />
                         }
                         {activeTab === 'minor' &&
@@ -204,6 +207,7 @@ function HomePanelBase(
                                 scheme={scheme}
                                 setPopout={(value) => setPopout(value)}
                                 platform={platform}
+                                offline={offline}
                             />
                         }
                         {activeTab === 'middle' &&
@@ -218,6 +222,7 @@ function HomePanelBase(
                                 scheme={scheme}
                                 setPopout={(value) => setPopout(value)}
                                 platform={platform}
+                                offline={offline}
                             />
                         }
                         {activeTab === 'major' &&
@@ -232,6 +237,7 @@ function HomePanelBase(
                                 scheme={scheme}
                                 setPopout={(value) => setPopout(value)}
                                 platform={platform}
+                                offline={offline}
                             />
                         }
                         {activeTab === 'critical' &&
@@ -247,6 +253,7 @@ function HomePanelBase(
                                 scheme={scheme}
                                 setPopout={(value) => setPopout(value)}
                                 platform={platform}
+                                offline={offline}
                             />
                         }
 
